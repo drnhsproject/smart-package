@@ -93,6 +93,14 @@ Flags combine.
   (the project tracks it on purpose) or that `git check-ignore -q` accepts; append the rest to
   `$(git rev-parse --git-path info/exclude)`, never to the shared `.gitignore`, and say so in
   one line. Folders the project already uses (`docs/plans/`, `plans/`) are left alone.
+- **Project rules (only if the project has any).** Look for `AGENTS.md`, `CLAUDE.md`,
+  `.agents/AGENTS.md`, and a rules folder (`.agents/rules/`, `docs/rules/`, `CONTRIBUTING.md`).
+  Read the index file, then only the rules the plan's `Rules applied` cites or that the files
+  the Tasks touch clearly fall under. Log one line: `rules · <files read>`, or
+  `rules · none found` and move on: no rules is a normal state, never a blocker, a question,
+  or a reason to stop. These rules guide how you write each task; they never widen the plan's
+  scope, and a rule that would need work the plan does not list is a `Found:` line, not code.
+  If a task cannot be done without breaking a rule, that is a Step 4 blocked task.
 - **Baseline**: run the plan's lint / typecheck / test commands once, before any edit, and
   log the summary. A pre-existing failure is reported, not fixed, and never counted as yours.
 
@@ -170,7 +178,11 @@ the author). Give it: the plan path, the list of changed files, the pre-run copi
 and these instructions: read-only, never edit; three passes over the changed files only, for
 **bugs** (logic errors, unhandled cases, regressions against the plan's Accept criteria),
 **security** (injection, secrets, unsafe input handling, auth gaps, data exposure), and
-**performance** (needless loops, repeated queries, heavy work on a hot path); report each
+**performance** (needless loops, repeated queries, heavy work on a hot path), plus a fourth
+pass for **rules**, only when Step 2 logged rule files: give it those paths and have it check the
+changed code against them, citing the rule file and section for each finding. Severity follows the
+rule's own weight (a rule marked mandatory or security-related: HIGH; otherwise MEDIUM). When Step 2
+logged `rules · none found`, there is no rules pass and nothing is reported about rules. Report each
 finding as `ID · severity (CRITICAL/HIGH/MEDIUM/LOW) · file:line · evidence · suggested fix`;
 report nothing without evidence from the code.
 
@@ -198,7 +210,7 @@ Save to `.agents/reviews/YYYY/MM/DD/YYYY-MM-DD-<TICKET|slug>-review.md` (or an e
 ```markdown
 # Review: <TICKET> <plan title>
 Plan: <path> · Date · Reviewer: subagent | inline (author) · Result: <n> findings
-## <ID> · <severity> · <bugs|security|performance>
+## <ID> · <severity> · <bugs|security|performance|rules>
 Where: file:line · Evidence: <what the code does> · Suggested fix: <1-2 lines>
 Resolution: OPEN | FIXED (user decision, round n) | ACCEPTED (user decision) | FOLLOW-UP
 ```

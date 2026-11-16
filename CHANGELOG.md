@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- smart-implement now reads the project's rules when it has any (`AGENTS.md`, `CLAUDE.md`, a
+  rules folder) in Step 2, and the Step 6 reviewer gets a fourth pass, "rules", checking the
+  change against them. A project with no rules logs `rules · none found`, skips the pass, and
+  carries on: never a blocker. Not yet run on a real plan.
+
 - First real run (a Next.js portfolio): plan, branch guard, review with a HIGH finding,
   fatal stop, two fix rounds, and report all worked. Lint missed a broken import alias that
   `tsc --noEmit` caught, so both skills now require `tsc --noEmit` when a `tsconfig.json`
