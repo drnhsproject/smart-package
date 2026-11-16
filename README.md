@@ -70,16 +70,23 @@ Flow: Clarify → Explore → Rules → Design → Self-check → Output → Sav
 /smart-implement <plan> --task=T3                     one task (and what it depends on)
 ```
 
-Flow: Locate → Check → Approve → Execute → Final check → Close → Stop.
+Flow: Locate → Check → Approve → Execute → Scope trace → Review → Close → Stop.
 
-- **Checks first.** Open questions answered, earlier parts done, the cited `file:line`
-  evidence still true, and a lint / test baseline taken before the first edit.
+- **Checks first.** Open questions answered, earlier parts done, not on `main`/`master`,
+  the cited `file:line` evidence still true, and a lint / test baseline taken before the
+  first edit. `--dry-run` stops here.
 - **The plan is the scope.** Anything else it finds is logged as `Found:` or `Deviation:`,
   not coded. A task that cannot be done as written stops the run instead of being improvised.
 - **Proof per task.** A task is ticked only after its own `Verify` ran and passed.
-- **Resumable.** The plan file says where things stand, so a new session continues from
-  the first unticked task.
-- **No surprises.** No commit, push, deploy, or destructive command without your own say-so.
+- **Scope trace.** At the end every changed hunk must trace to a task or a decision of
+  yours, and every ticked box must have a hunk. Unmapped changes stop the run.
+- **Independent review** for anything bigger than a small change (more than 2 files, a
+  contract change, or a new module): a separate subagent checks bugs, security, and
+  performance, read-only. If no subagent can be started it stops and asks; it never
+  reviews its own work in silence. `--skip-review` is recorded in the log.
+- **Four fatal stops** (secrets or destructive scope, critical review finding, red gate,
+  unmapped scope), and **resumable** from the plan file in a new session.
+- **No surprises.** No push, deploy, or destructive command; no commit without your say-so.
 
 ## Install
 

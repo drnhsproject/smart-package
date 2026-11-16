@@ -3,9 +3,11 @@
 ## Unreleased
 
 - New skill `smart-implement`: executes a saved plan task by task (checks first, plan is
-  the scope, tick only after Verify passes, dated Execution log, resumable) and moves
-  the plan `APPROVED → IN PROGRESS → DONE`. The repository is now a pair of skills.
-  Written from scratch; not yet run on a real plan.
+  the scope, tick only after Verify passes, scope trace, independent review of non-small
+  plans, four fatal stops, resumable) and moves the plan
+  `APPROVED → IN PROGRESS → DONE`. The repository is now a pair of skills. Written from
+  scratch, informed by the author's own project-level implement skills; not yet run on a
+  real plan.
 - Plans and analyses are saved under `.agents/plans/` and `.agents/analysis/` by default
   (an existing `docs/plans/` or `plans/` is still used if the project has one).
 - Plans use the same dated folders as analyses (`YYYY/MM/DD/YYYY-MM-DD-<TICKET>-<name>.md`);
