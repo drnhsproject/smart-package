@@ -166,10 +166,10 @@ npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implemen
 npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implement --skill smart-qa --skill smart-fix -g
 ```
 
-Checked earlier, when the repository held `smart-plan` and `smart-implement`: `--list` found both, and
-`-a claude-code` copied each `SKILL.md` to `.claude/skills/<name>/`, identical to this repository.
-Not re-checked since `smart-qa` and `smart-fix` were added, nor the interactive agent prompt, nor
-agents other than Claude Code.
+Checked on 2026-11-16, with all four skills in the repository: `--list` found `smart-plan`,
+`smart-implement`, `smart-qa` and `smart-fix`, and `--skill <name> ... -a claude-code -y` into an empty
+git project copied each `SKILL.md` to `.claude/skills/<name>/`, byte-identical to this repository
+(`cmp`). Not checked: the interactive agent prompt, `-g`, and agents other than Claude Code.
 
 The CLI collects anonymous usage data; set `DISABLE_TELEMETRY=1` to opt out.
 It is a third-party tool. Skills run with your agent's permissions, so read

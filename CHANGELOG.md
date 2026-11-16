@@ -1,6 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.2.0 (2026-11-16)
+
+Four skills: `smart-plan`, `smart-implement`, `smart-qa`, `smart-fix`. Tried together on one project
+only (a Next.js portfolio, by its author): plan, implement with independent review, QA, repair,
+and a live check of the deployed site. Not yet tried on a non-Next.js project, with a real login
+session in `smart-qa`, or by anyone other than the author. Install check: `npx skills add ... --list`
+and a clean-project install both match this repository byte for byte (see README).
+
 
 - New skill `smart-fix`: fixes the findings of a `smart-qa` report one at a time. Re-proves each
   finding first (a finding it cannot reproduce is `DISPUTED` with evidence, not "fixed"), makes
