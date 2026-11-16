@@ -1,6 +1,6 @@
 ---
 name: smart-plan
-description: Planning and analysis only, never edits code. Explores the real codebase with the smallest token spend, then delivers ONE recommended implementation plan (or one written analysis) grounded in file:line evidence, saved as a Markdown file. Use when the user says /smart-plan, asks for a plan before a non-trivial change ("make a plan", "plan this", "how should we approach", "buat plan", "rencanakan"), or asks for a written, saved analysis ("write an analysis of", "buat analisa tertulis"). Not for writing code, and not for quick questions about the code that can be answered directly in chat.
+description: Planning and analysis only, never edits code. Explores the real codebase with the smallest token spend, then delivers ONE recommended implementation plan (or one written analysis) grounded in file:line evidence, saved as a Markdown file. Use when the user says /smart-plan, asks for a plan before a non-trivial change ("make a plan", "plan this", "how should we approach"), or asks for a written, saved analysis ("write an analysis of"). Not for writing code, and not for quick questions about the code that can be answered directly in chat.
 allowed-tools: Read Write Glob Grep Bash AskUserQuestion
 license: MIT
 ---
@@ -23,7 +23,7 @@ token spend that still gets it right.
 - Read-only commands are fine: `git log|diff|status`, `grep`, `ls`, reading files, and
   lint/typecheck/test commands when a baseline is needed for an analysis.
 - After the plan is delivered, STOP. Implement only when the user explicitly orders it in a
-  later message ("go", "implement", "lanjut", "kerjakan"). A question or a tweak request is
+  later message ("go", "implement", "proceed"). A question or a tweak request is
   NOT an order: revise the plan instead (Step 7, revisions).
 
 ## Invocation
@@ -221,7 +221,7 @@ confirmed, label it `UNVERIFIED` and say how to confirm it.
 
 End with, in the user's language: a 2–4 line summary of the recommendation, the top risk,
 the saved path (if any), and one line stating that no code was changed and that the user can
-reply "go" / "lanjut" to execute the plan. Then stop and wait.
+reply "go" to execute the plan. Then stop and wait.
 
 ---
 
