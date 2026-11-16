@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- New skill `smart-fix`: fixes the findings of a `smart-qa` report one at a time. Re-proves each
+  finding first (a finding it cannot reproduce is `DISPUTED` with evidence, not "fixed"), makes
+  the smallest root-cause change, adds a regression test, runs the project's checks, and
+  appends a Remediation section to the same report. It never grades its own work (only a new
+  `smart-qa` run can) and never commits. Written from scratch. First trial (a Next.js portfolio, review report, 2 LOW findings): one
+  finding was already fixed in the working tree and was `DISPUTED` with evidence instead of
+  edited, the other was reproduced, fixed and re-checked. Review reports use `Resolution:`
+  instead of `Status:`; the skill now says so. Second trial, on a `smart-qa` report (2 LOW findings): one was reproduced, fixed and measured before and after (a chunked upload pulled 30 MB before the cap, 6.3 MB after), the other was `DEFERRED` as a design change and sent back to `smart-plan`. Run by hand from its `SKILL.md`, not yet through an installed skill.
+
 - New skill `smart-qa`: tests what `smart-implement` built (bugs, security, regressions),
   writes an evidence-backed report under `.agents/qa/` with a PASS / PASS WITH FOLLOW-UPS / FAIL
   verdict, and never edits product code. `--live <url>` probes the deployed site (one origin,

@@ -1,6 +1,6 @@
 # smart-plan
 
-A pair of Agent Skills: one plans, the other carries the plan out.
+A set of Agent Skills for one loop: plan, build, test, repair.
 
 - **`smart-plan`** plans before anything is coded. It explores the real codebase with
   the smallest token spend, then delivers **one** recommended plan (or one analysis)
@@ -8,8 +8,12 @@ A pair of Agent Skills: one plans, the other carries the plan out.
 - **`smart-implement`** executes a saved plan task by task, proves each task, and keeps
   the plan file true (ticked tasks, a dated log, the status).
 
-Both are instructed to stay inside their role (`smart-plan` never edits code,
-`smart-implement` never goes beyond the plan). This is enforced by the skills' rules,
+- **`smart-qa`** tries to break what was built and writes an evidence-backed report.
+- **`smart-fix`** repairs the findings of that report, one at a time, with a regression test each.
+
+Each is instructed to stay inside its role (`smart-plan` never edits code,
+`smart-implement` never goes beyond the plan, `smart-qa` never edits product code,
+`smart-fix` never judges its own fix). This is enforced by the skills' rules,
 not by a sandbox, so keep your normal permission prompts on.
 
 ## The lifecycle
@@ -114,6 +118,27 @@ Flow: Locate → Scope → Baseline → Test → Security → Regression → Liv
 - **Verdict**: PASS / PASS WITH FOLLOW-UPS / FAIL, saved to `.agents/qa/`. Nothing is committed
   or pushed.
 
+## smart-fix
+
+```
+/smart-fix ABC-123                      fix the open CRITICAL and HIGH findings of that QA report
+/smart-fix                              the QA report just written
+/smart-fix <report> --id=QA-3,QA-5      only those findings
+/smart-fix <report> --all               MEDIUM and LOW too
+```
+
+Flow: Locate → Confirm → Fix → Prove → Record → Stop.
+
+- **Re-proves each finding first.** If it cannot be reproduced, nothing is edited and the
+  finding is recorded `DISPUTED` with evidence. A fix for a non-bug is a new bug.
+- **Smallest root-cause change, one finding at a time**, most severe first. A fix that grows
+  past 3 files, or needs a schema change or a decision from you, is `DEFERRED` and sent to
+  `smart-plan`.
+- **A regression test per fix** that fails before and passes after, plus the project's lint,
+  typecheck and the tests of everything touched.
+- **Never grades its own work.** It records the outcome in the same QA report; only a new
+  `/smart-qa` run can turn the verdict. Nothing is committed or pushed.
+
 ## Stays local
 
 Plans, analyses, and review reports under `.agents/` are working notes. On first write the
@@ -124,7 +149,7 @@ skills add `.agents/` (and their own installed copies, when untracked) to the re
 
 ## Install
 
-Install both skills; `smart-implement` needs the plans that `smart-plan` writes.
+Install the skills you want. `smart-implement` needs the plans that `smart-plan` writes, and `smart-fix` needs the reports that `smart-qa` writes.
 
 With the community `skills` CLI
 ([vercel-labs/skills](https://github.com/vercel-labs/skills)):
@@ -134,17 +159,17 @@ With the community `skills` CLI
 npx skills add drnhsproject/smart-plan --list
 
 # install into the current project
-npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implement
+npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implement --skill smart-qa --skill smart-fix
 
 # install for one agent, or for every project of yours
-npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implement -a claude-code
-npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implement -g
+npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implement --skill smart-qa --skill smart-fix -a claude-code
+npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implement --skill smart-qa --skill smart-fix -g
 ```
 
-Checked on this repository: `--list` finds both skills, and
-`--skill smart-plan --skill smart-implement -a claude-code` copies each `SKILL.md`
-to `.claude/skills/<name>/`, identical to this repository. Not checked: the
-interactive agent prompt, and agents other than Claude Code.
+Checked earlier, when the repository held `smart-plan` and `smart-implement`: `--list` found both, and
+`-a claude-code` copied each `SKILL.md` to `.claude/skills/<name>/`, identical to this repository.
+Not re-checked since `smart-qa` and `smart-fix` were added, nor the interactive agent prompt, nor
+agents other than Claude Code.
 
 The CLI collects anonymous usage data; set `DISABLE_TELEMETRY=1` to opt out.
 It is a third-party tool. Skills run with your agent's permissions, so read
@@ -154,10 +179,10 @@ Without the CLI, copy the skill folder yourself:
 
 ```bash
 # all projects (personal)
-cp -R skills/smart-plan skills/smart-implement ~/.claude/skills/
+cp -R skills/smart-plan skills/smart-implement skills/smart-qa skills/smart-fix ~/.claude/skills/
 
 # one project
-cp -R skills/smart-plan skills/smart-implement <project>/.claude/skills/
+cp -R skills/smart-plan skills/smart-implement skills/smart-qa skills/smart-fix <project>/.claude/skills/
 ```
 
 A project skill with the same name overrides the personal one.
