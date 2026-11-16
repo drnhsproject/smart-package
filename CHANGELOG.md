@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- New skill `smart-qa`: tests what `smart-implement` built (bugs, security, regressions),
+  writes an evidence-backed report under `.agents/qa/` with a PASS / PASS WITH FOLLOW-UPS / FAIL
+  verdict, and never edits product code. `--live <url>` probes the deployed site (one origin,
+  read-only or non-writing anonymous probes) to prove the fix is live; a session for login-protected
+  checks comes from a local test setup or `QA_SESSION_COOKIE`, and a login-protected fix that could
+  not be exercised cannot earn a plain PASS. Run once on a real project (a Next.js portfolio, by
+  its author); found two issues that review and lint missed. Not yet run on other projects or by
+  someone other than its author.
+
 - smart-implement now reads the project's rules when it has any (`AGENTS.md`, `CLAUDE.md`, a
   rules folder) in Step 2, and the Step 6 reviewer gets a fourth pass, "rules", checking the
   change against them. A project with no rules logs `rules · none found`, skips the pass, and

@@ -90,6 +90,30 @@ Flow: Locate → Check → Approve → Execute → Scope trace → Review → Cl
   unmapped scope), and **resumable** from the plan file in a new session.
 - **No surprises.** No push, deploy, or destructive command; no commit without your say-so.
 
+## smart-qa
+
+```
+/smart-qa ABC-123                       test what that plan built
+/smart-qa                               the plan just implemented, or the latest DONE one
+/smart-qa <plan> --live https://site    also probe the deployed site
+/smart-qa --diff                        no plan: test the current uncommitted diff
+```
+
+Flow: Locate → Scope → Baseline → Test → Security → Regression → Live (optional) → Report → Stop.
+
+- **Tries to break the change**, per Accept criterion: edge inputs, error paths, repeated or
+  concurrent calls, callers of what changed, then a security pass (injection, auth and
+  object-level access, uploads, secrets, new dependencies). Each finding carries a
+  reproduction or `file:line`; no evidence, no finding.
+- **Never edits product code.** Fixes go back through `smart-plan` → `smart-implement`.
+- **Logins are not skipped silently.** It uses a local test setup, or a session you pass in the
+  `QA_SESSION_COOKIE` environment variable (never pasted in chat). Without either, those checks
+  are `not run` and the verdict cannot be a plain `PASS`.
+- **`--live <url>`** checks that the fix is actually deployed: read-only requests and anonymous
+  probes that cannot write data even if the gate is missing, one origin, about 50 requests.
+- **Verdict**: PASS / PASS WITH FOLLOW-UPS / FAIL, saved to `.agents/qa/`. Nothing is committed
+  or pushed.
+
 ## Stays local
 
 Plans, analyses, and review reports under `.agents/` are working notes. On first write the
