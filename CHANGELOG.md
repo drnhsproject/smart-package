@@ -8,6 +8,9 @@
   Written from scratch; not yet run on a real plan.
 - Plans and analyses are saved under `.agents/plans/` and `.agents/analysis/` by default
   (an existing `docs/plans/` or `plans/` is still used if the project has one).
+- Plans use the same dated folders as analyses (`YYYY/MM/DD/YYYY-MM-DD-<TICKET>-<name>.md`);
+  every plan and task carries the ticket number (`ABC-123-T1`), taken from `--ticket=`, the
+  message, or the branch name, and `/smart-implement ABC-123` finds the plan by it.
 - smart-plan hands over to `smart-implement`; analyses are never executed directly.
 
 - Description narrowed: no longer triggers on generic "analyze this"; quick questions

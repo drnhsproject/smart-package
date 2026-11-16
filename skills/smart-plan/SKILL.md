@@ -34,6 +34,7 @@ token spend that still gets it right.
 /smart-plan <question> --analysis           analysis only (no implementation plan)
 /smart-plan <task> --no-save                chat only, write nothing
 /smart-plan <task> --scope=<path>           restrict exploration to a path
+/smart-plan <task> --ticket=ABC-123         ticket number to put on the plan and its tasks
 ```
 
 Flags combine. Anything else in the argument string is the task description. If no
@@ -52,7 +53,7 @@ Look for these, in order, and remember what exists. Everything later is conditio
 | Knowledge graph (`graphify-out/graph.json` + `graphify` command) | use it first in Step 2 | use `grep` and targeted reads |
 | Code summaries (`.agents/code-analysis/`, `docs/architecture*`) | read the index, not the large files | skip |
 | Change history (`CHANGELOG_FIXES.md`, `CHANGELOG.md`) | grep only, never read whole | `git log` |
-| Plans folder (`.agents/plans/`, else an existing `docs/plans/` or `plans/`) | save here, grouped by area | create `.agents/plans/` |
+| Plans folder (`.agents/plans/`, else an existing `docs/plans/` or `plans/`) | save here, in dated folders | create `.agents/plans/` |
 | Analysis folder (`.agents/analysis/`, else an existing `docs/analysis/`) | save analyses here | create `.agents/analysis/` |
 | Package manifest (`package.json`, `pyproject.toml`, `go.mod`, `composer.json`, …) | find the real lint / typecheck / test commands | ask or label `UNVERIFIED` |
 
@@ -70,6 +71,15 @@ convention: decide, and state the assumption in the plan.
 Ask BEFORE deep exploration ONLY when a true business/product fork or unresolvable
 ambiguity exists: at most 1–4 focused questions, recommended option first, each option
 stating its consequence. Ask again later only if exploration reveals a real fork.
+
+### Ticket number
+
+Every plan carries the ticket it belongs to, in the header and in every task id. Take it,
+in this order, from: `--ticket=`, the user's message, the current git branch name
+(`git branch --show-current`, first match of `[A-Za-z][A-Za-z0-9]*-[0-9]+`, uppercased), the
+newest open plan's `Ticket:`. If none is found, ask once ("Which ticket is this for? Reply
+`none` if there is no ticket"). With no ticket, the header says `Ticket: none` and task ids
+are plain `T<n>`. Never invent a ticket number.
 
 ## Step 2 — Explore, smallest context first (token budget discipline)
 
@@ -155,7 +165,7 @@ summary in the user's language (Step 8). Never paste the full plan into chat as 
 
 ```markdown
 # Plan: <title>
-Status: DRAFT · Revision: 1 · Run reference: <kebab-name> + YYYY-MM-DD
+Status: DRAFT · Revision: 1 · Ticket: <ABC-123 | none> · Run reference: <kebab-name> + YYYY-MM-DD
 Area: <area> · Module: <module>
 Follows: <optional prior plan> · Sibling: <optional parallel plan> · Part: <n of m, split plans only>
 
@@ -166,7 +176,8 @@ Follows: <optional prior plan> · Sibling: <optional parallel plan> · Part: <n 
 ## Key decisions    — decision → rationale (one line each)
 ## Affected layers & contract impact — layers touched; API/data contracts, or "none"
 ## Tasks            — `- [ ]` checklist grouped by layer/component (never pre-checked):
-                      `- [ ] T<n> <what> — <file(s)> · Accept: <criterion> · Verify: <command or manual check> · BLOCKED_BY: T<m>`
+                      `- [ ] <TICKET>-T<n> <what> — <file(s)> · Accept: <criterion> · Verify: <command or manual check> · BLOCKED_BY: <TICKET>-T<m>`
+                      (with `Ticket: none`, ids are plain `T<n>`)
 ## Reused code      — existing functions/hooks/utils with paths
 ## Rules applied    — rule file + section
 ## Risks & trade-offs — including the premortem line
@@ -196,9 +207,10 @@ confirmed, label it `UNVERIFIED` and say how to confirm it.
 
 ## Step 7 — Save (skipped with `--no-save`)
 
-- Plans: `<plans folder>/<area>/<kebab-name>.md`. `<area>` is a functional subfolder
-  (for example `architecture`, `data`, `ui`, `reliability`, `testing`, `tooling`,
-  `documentation`), never a flat file in the plans folder.
+- Plans: `<plans folder>/YYYY/MM/DD/YYYY-MM-DD-<TICKET>-<kebab-name>.md`, dated by the day
+  the plan is first written (the ticket part is left out with `Ticket: none`). Create date
+  folders if missing. The functional area stays in the header (`Area:`), not in the path. A
+  revised plan keeps its original file and folder.
 - Analyses: `<analysis folder>/YYYY/MM/DD/YYYY-MM-DD-<kebab-name>.md`, dated by the day
   written. Create date folders if missing. Supporting data files go in the same folder.
 - **De-duplicate before writing**: `grep -rilF -- '<topic keywords>'` over the plans and

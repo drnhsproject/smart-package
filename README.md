@@ -23,9 +23,13 @@ Plans and analyses are saved under `.agents/` in the project (created on first u
 an existing `docs/plans/` or `plans/` folder is used instead if the project has one):
 
 ```
-.agents/plans/<area>/<name>.md                       the plan (DRAFT → DONE)
-.agents/analysis/YYYY/MM/DD/YYYY-MM-DD-<name>.md     an analysis (FINAL, never rewritten)
+.agents/plans/YYYY/MM/DD/YYYY-MM-DD-<TICKET>-<name>.md     the plan (DRAFT → DONE)
+.agents/analysis/YYYY/MM/DD/YYYY-MM-DD-<name>.md            an analysis (FINAL, never rewritten)
 ```
+
+Every plan carries its ticket (`Ticket: ABC-123`, taken from `--ticket=`, your message, or
+the git branch name; asked once if none is found) and its tasks are numbered with it
+(`ABC-123-T1`, `ABC-123-T2`, ...). `/smart-implement ABC-123` finds the plan by ticket.
 
 The plan file is the only work file: its `## Tasks` checklist is what gets executed,
 and its `## Execution log` is where `smart-implement` records what happened. Commit
@@ -60,7 +64,8 @@ Flow: Clarify → Explore → Rules → Design → Self-check → Output → Sav
 ## smart-implement
 
 ```
-/smart-implement .agents/plans/data/csv-export.md     execute that plan
+/smart-implement ABC-123                              execute the open plan of that ticket
+/smart-implement .agents/plans/2026/11/16/<plan>.md   execute that plan file
 /smart-implement                                      the plan just delivered, or the only open one
 /smart-implement <plan> --task=T3                     one task (and what it depends on)
 ```
