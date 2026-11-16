@@ -5,6 +5,9 @@
 - Description narrowed: no longer triggers on generic "analyze this"; quick questions
   are answered in chat. Not yet measured by a trigger eval.
 - Step 0 now detects the analysis folder (default `docs/analysis/`).
+- Tasks must change something (unchanged behaviour goes in Findings); Step 0 says what
+  to do when the project has no test or typecheck command. Both found by one manual
+  run on a Next.js project.
 - Output language rule stated explicitly; README clarifies read-only is rule-based.
 
 ## 0.1.0

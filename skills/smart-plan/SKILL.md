@@ -56,7 +56,9 @@ Look for these, in order, and remember what exists. Everything later is conditio
 | Package manifest (`package.json`, `pyproject.toml`, `go.mod`, `composer.json`, …) | find the real lint / typecheck / test commands | ask or label `UNVERIFIED` |
 
 Never invent a path or command that Step 0 did not find. Write the project's real
-commands in the plan's Verification.
+commands in the plan's Verification. If the project has no test or typecheck command,
+say so in Verification, label any command you would suggest `UNVERIFIED`, and give a
+manual check (for example a `curl` call or a UI step) for each behaviour the plan changes.
 
 ## Step 1 — Clarify (only what blocks a good plan)
 
@@ -124,6 +126,8 @@ No rule folder: say "no written rules found" and follow the conventions visible 
   each task one acceptance criterion in the project's own domain vocabulary. The plan is the
   ONLY work file: write the tasks as the `## Tasks` checklist itself, detailed enough that
   an implementer executes it without a second document.
+- Every task must change something. Behaviour that already exists and stays as it is
+  belongs in Findings, never in Tasks.
 - Name the concrete files to touch. For a pattern repeated across many files, describe it
   once and list a few representative paths.
 - Surface risks honestly: contract impact (API, database, external dashboards), regressions
