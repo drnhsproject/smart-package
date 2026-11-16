@@ -33,14 +33,17 @@ file as a true record. Flow:
 
 ```
 /smart-implement <path-to-plan>        execute that plan
+/smart-implement ABC-123                execute the open plan of that ticket
 /smart-implement                       execute the plan just delivered, or the only open one
 /smart-implement <path> --task=T3      execute one task (and any BLOCKED_BY it needs) only
 ```
 
 ## Step 1 — Locate the plan
 
-1. Use the path given. Otherwise take the plan delivered earlier in this conversation.
-   Otherwise look in the plans folder (`.agents/plans/`, else `docs/plans/`, `plans/`) for
+1. Use the path given. A ticket number instead of a path: search the plans folder for
+   `Ticket: <ID>` and take the plan that is not `DONE`. Otherwise take the plan delivered
+   earlier in this conversation. Otherwise look in the plans folder (`.agents/plans/`, else
+   `docs/plans/`, `plans/`, searched recursively through its `YYYY/MM/DD/` folders) for
    files with `Status: APPROVED` or `IN PROGRESS`.
 2. More than one candidate: ask which, listing path and title. None: say so and suggest
    `/smart-plan`.
@@ -84,7 +87,7 @@ Set `Status: IN PROGRESS` before the first edit. Then, per task, in dependency o
 3. Run the task's `Verify`. If it fails, fix the cause within the task's scope and run it
    again. After two failed attempts at the same task, stop, log it, and ask the user.
 4. Tick the task `- [x]` and append one line to the Execution log:
-   `YYYY-MM-DD HH:MM T<n> done — <what changed, files> — <verify result>`.
+   `YYYY-MM-DD HH:MM <TICKET>-T<n> done — <what changed, files> — <verify result>`.
 5. Anything unplanned that you found (a bug nearby, a missing step, a wrong assumption) goes
    in the log as `Deviation:` or `Found:` with one line, not into the code.
 
@@ -93,7 +96,7 @@ must already say where things stand. Edit only three things in the plan: task ch
 the `Status` line, and the Execution log. Do not reword Tasks, Findings, or Risks.
 
 When a task is blocked (a missing decision, an external dependency, a failing check you
-cannot fix in scope): leave it unticked, log `T<n> BLOCKED — <reason>`, keep
+cannot fix in scope): leave it unticked, log `<TICKET>-T<n> BLOCKED — <reason>`, keep
 `Status: IN PROGRESS`, and tell the user what is needed. Do not skip ahead to tasks that
 depend on it.
 
