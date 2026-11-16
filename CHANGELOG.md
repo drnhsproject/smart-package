@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+- First real run (a Next.js portfolio): plan, branch guard, review with a HIGH finding,
+  fatal stop, two fix rounds, and report all worked. Lint missed a broken import alias that
+  `tsc --noEmit` caught, so both skills now require `tsc --noEmit` when a `tsconfig.json`
+  exists. "Keep local" and the review-report text were shortened.
+- "Keep local": before the first write under `.agents/`, both skills add `.agents/` (and the
+  untracked installed copies of the skills) to the repository's `.git/info/exclude`, never to
+  the project's `.gitignore`; paths the project tracks on purpose are left alone.
+  `smart-implement` stages only the plan's files by explicit path and never `.agents/`.
+- smart-implement Step 6 now records every review finding (all severities, including
+  CRITICAL/HIGH, before the Fatal-Stop) as a log line, and writes a review report with
+  evidence, suggested fix and resolution to `.agents/reviews/YYYY/MM/DD/`. Not yet run on
+  a real plan.
 - New skill `smart-implement`: executes a saved plan task by task (checks first, plan is
   the scope, tick only after Verify passes, scope trace, independent review of non-small
   plans, four fatal stops, resumable) and moves the plan

@@ -83,10 +83,20 @@ Flow: Locate → Check → Approve → Execute → Scope trace → Review → Cl
 - **Independent review** for anything bigger than a small change (more than 2 files, a
   contract change, or a new module): a separate subagent checks bugs, security, and
   performance, read-only. If no subagent can be started it stops and asks; it never
-  reviews its own work in silence. `--skip-review` is recorded in the log.
+  reviews its own work in silence. `--skip-review` is recorded in the log. Every finding,
+  of every severity, is logged first and written to a review report under
+  `.agents/reviews/` (evidence, suggested fix, resolution) before any stop.
 - **Four fatal stops** (secrets or destructive scope, critical review finding, red gate,
   unmapped scope), and **resumable** from the plan file in a new session.
 - **No surprises.** No push, deploy, or destructive command; no commit without your say-so.
+
+## Stays local
+
+Plans, analyses, and review reports under `.agents/` are working notes. On first write the
+skills add `.agents/` (and their own installed copies, when untracked) to the repository's
+`.git/info/exclude`: local to your clone, so nothing reaches the remote and your
+`.gitignore` is untouched. Paths your project already tracks are left alone, and
+`smart-implement` never stages `.agents/` or uses `git add -A`.
 
 ## Install
 
