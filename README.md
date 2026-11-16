@@ -1,12 +1,38 @@
 # smart-plan
 
-An Agent Skill that plans before anything is coded. It explores the real
-codebase with the smallest token spend, then delivers **one** recommended plan
-(or one analysis) grounded in `file:line` evidence, saved as a Markdown file.
-It is instructed never to edit code; this is enforced by the skill's rules, not by
-a sandbox, so keep your normal permission prompts on.
+A pair of Agent Skills: one plans, the other carries the plan out.
 
-## What it does
+- **`smart-plan`** plans before anything is coded. It explores the real codebase with
+  the smallest token spend, then delivers **one** recommended plan (or one analysis)
+  grounded in `file:line` evidence, saved as a Markdown file in your project.
+- **`smart-implement`** executes a saved plan task by task, proves each task, and keeps
+  the plan file true (ticked tasks, a dated log, the status).
+
+Both are instructed to stay inside their role (`smart-plan` never edits code,
+`smart-implement` never goes beyond the plan). This is enforced by the skills' rules,
+not by a sandbox, so keep your normal permission prompts on.
+
+## The lifecycle
+
+```
+/smart-plan <task>          DRAFT ──(you say "go")──► APPROVED ──► IN PROGRESS ──► DONE
+                                     /smart-implement <plan>          (smart-implement)
+```
+
+Plans and analyses are saved under `.agents/` in the project (created on first use;
+an existing `docs/plans/` or `plans/` folder is used instead if the project has one):
+
+```
+.agents/plans/<area>/<name>.md                       the plan (DRAFT → DONE)
+.agents/analysis/YYYY/MM/DD/YYYY-MM-DD-<name>.md     an analysis (FINAL, never rewritten)
+```
+
+The plan file is the only work file: its `## Tasks` checklist is what gets executed,
+and its `## Execution log` is where `smart-implement` records what happened. Commit
+`.agents/` with the work it describes. An analysis is not executed directly; ask for a
+plan that `Follows:` it.
+
+## smart-plan
 
 ```
 /smart-plan add CSV export to the report page     plan, saved to the plans folder
@@ -17,7 +43,7 @@ a sandbox, so keep your normal permission prompts on.
 
 Flow: Clarify → Explore → Rules → Design → Self-check → Output → Save → Stop.
 
-## How it differs from asking for "a plan"
+### How it differs from asking for "a plan"
 
 - **Read-only.** No code, config, or git writes until you say go. A tweak request
   revises the plan; it is not a go signal.
@@ -31,7 +57,28 @@ Flow: Clarify → Explore → Rules → Design → Self-check → Output → Sav
 - **Executable plan.** Tasks are a checklist with file, acceptance criterion,
   verification command, and dependencies, so an implementer needs no second document.
 
+## smart-implement
+
+```
+/smart-implement .agents/plans/data/csv-export.md     execute that plan
+/smart-implement                                      the plan just delivered, or the only open one
+/smart-implement <plan> --task=T3                     one task (and what it depends on)
+```
+
+Flow: Locate → Check → Approve → Execute → Final check → Close → Stop.
+
+- **Checks first.** Open questions answered, earlier parts done, the cited `file:line`
+  evidence still true, and a lint / test baseline taken before the first edit.
+- **The plan is the scope.** Anything else it finds is logged as `Found:` or `Deviation:`,
+  not coded. A task that cannot be done as written stops the run instead of being improvised.
+- **Proof per task.** A task is ticked only after its own `Verify` ran and passed.
+- **Resumable.** The plan file says where things stand, so a new session continues from
+  the first unticked task.
+- **No surprises.** No commit, push, deploy, or destructive command without your own say-so.
+
 ## Install
+
+Install both skills; `smart-implement` needs the plans that `smart-plan` writes.
 
 With the community `skills` CLI
 ([vercel-labs/skills](https://github.com/vercel-labs/skills)):
@@ -41,16 +88,16 @@ With the community `skills` CLI
 npx skills add drnhsproject/smart-plan --list
 
 # install into the current project
-npx skills add drnhsproject/smart-plan --skill smart-plan
+npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implement
 
 # install for one agent, or for every project of yours
-npx skills add drnhsproject/smart-plan --skill smart-plan -a claude-code
-npx skills add drnhsproject/smart-plan --skill smart-plan -g
+npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implement -a claude-code
+npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implement -g
 ```
 
-Checked on this repository: `--list` finds the skill, and
-`--skill smart-plan -a claude-code` copies `SKILL.md` to
-`.claude/skills/smart-plan/`, identical to this repository. Not checked: the
+Checked on this repository: `--list` finds both skills, and
+`--skill smart-plan --skill smart-implement -a claude-code` copies each `SKILL.md`
+to `.claude/skills/<name>/`, identical to this repository. Not checked: the
 interactive agent prompt, and agents other than Claude Code.
 
 The CLI collects anonymous usage data; set `DISABLE_TELEMETRY=1` to opt out.
@@ -61,10 +108,10 @@ Without the CLI, copy the skill folder yourself:
 
 ```bash
 # all projects (personal)
-cp -R skills/smart-plan ~/.claude/skills/
+cp -R skills/smart-plan skills/smart-implement ~/.claude/skills/
 
 # one project
-cp -R skills/smart-plan <project>/.claude/skills/
+cp -R skills/smart-plan skills/smart-implement <project>/.claude/skills/
 ```
 
 A project skill with the same name overrides the personal one.

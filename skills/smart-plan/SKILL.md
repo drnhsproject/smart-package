@@ -22,8 +22,9 @@ token spend that still gets it right.
 - Never copy secrets (`.env` values, API keys, tokens) into a plan or analysis.
 - Read-only commands are fine: `git log|diff|status`, `grep`, `ls`, reading files, and
   lint/typecheck/test commands when a baseline is needed for an analysis.
-- After the plan is delivered, STOP. Implement only when the user explicitly orders it in a
-  later message ("go", "implement", "proceed"). A question or a tweak request is
+- After the plan is delivered, STOP. Implementation is a separate step, done by the
+  `smart-implement` skill, and only when the user explicitly orders it in a later message
+  ("go", "implement", "proceed"). A question or a tweak request is
   NOT an order: revise the plan instead (Step 7, revisions).
 
 ## Invocation
@@ -51,8 +52,8 @@ Look for these, in order, and remember what exists. Everything later is conditio
 | Knowledge graph (`graphify-out/graph.json` + `graphify` command) | use it first in Step 2 | use `grep` and targeted reads |
 | Code summaries (`.agents/code-analysis/`, `docs/architecture*`) | read the index, not the large files | skip |
 | Change history (`CHANGELOG_FIXES.md`, `CHANGELOG.md`) | grep only, never read whole | `git log` |
-| Plans folder (`.agents/plans/`, `docs/plans/`, `plans/`) | save here, grouped by area | create `docs/plans/` |
-| Analysis folder (`.agents/analysis/`, `docs/analysis/`) | save analyses here | create `docs/analysis/` |
+| Plans folder (`.agents/plans/`, else an existing `docs/plans/` or `plans/`) | save here, grouped by area | create `.agents/plans/` |
+| Analysis folder (`.agents/analysis/`, else an existing `docs/analysis/`) | save analyses here | create `.agents/analysis/` |
 | Package manifest (`package.json`, `pyproject.toml`, `go.mod`, `composer.json`, …) | find the real lint / typecheck / test commands | ask or label `UNVERIFIED` |
 
 Never invent a path or command that Step 0 did not find. Write the project's real
@@ -210,8 +211,9 @@ confirmed, label it `UNVERIFIED` and say how to confirm it.
 - **Revisions** (the user tweaks the plan): update the same file, bump `Revision: n`, and add
   one line under the header: `Revision n: <what changed and why>`. Revising an
   `APPROVED`/`IN PROGRESS` plan sets it back to `DRAFT`.
-- **Status lifecycle**: this skill writes `DRAFT` only. The implementer sets `APPROVED` and
-  `DONE`. Analyses are written as `FINAL`.
+- **Status lifecycle**: this skill writes `DRAFT` only. `smart-implement` moves a plan
+  `DRAFT → APPROVED → IN PROGRESS → DONE`. Analyses are written as `FINAL` and are never
+  implemented directly: a follow-up plan with `Follows: <analysis path>` is.
 - If the project has its own sync or index step for plan files, run it only if the project's
   rules say so; otherwise do nothing extra.
 - Do NOT create task files, change-log entries, or context updates: those belong to the
@@ -221,7 +223,7 @@ confirmed, label it `UNVERIFIED` and say how to confirm it.
 
 End with, in the user's language: a 2–4 line summary of the recommendation, the top risk,
 the saved path (if any), and one line stating that no code was changed and that the user can
-reply "go" to execute the plan. Then stop and wait.
+reply "go" (or run `/smart-implement <path>`) to execute the plan. Then stop and wait.
 
 ---
 

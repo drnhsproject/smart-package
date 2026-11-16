@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- New skill `smart-implement`: executes a saved plan task by task (checks first, plan is
+  the scope, tick only after Verify passes, dated Execution log, resumable) and moves
+  the plan `APPROVED → IN PROGRESS → DONE`. The repository is now a pair of skills.
+  Written from scratch; not yet run on a real plan.
+- Plans and analyses are saved under `.agents/plans/` and `.agents/analysis/` by default
+  (an existing `docs/plans/` or `plans/` is still used if the project has one).
+- smart-plan hands over to `smart-implement`; analyses are never executed directly.
+
 - Description narrowed: no longer triggers on generic "analyze this"; quick questions
   are answered in chat. Not yet measured by a trigger eval.
 - Step 0 now detects the analysis folder (default `docs/analysis/`).
