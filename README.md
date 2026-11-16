@@ -33,7 +33,31 @@ Flow: Clarify → Explore → Rules → Design → Self-check → Output → Sav
 
 ## Install
 
-Copy the skill folder to your skills directory:
+With the community `skills` CLI
+([vercel-labs/skills](https://github.com/vercel-labs/skills)):
+
+```bash
+# see what the repository offers, without installing
+npx skills add drnhsproject/smart-plan --list
+
+# install into the current project
+npx skills add drnhsproject/smart-plan --skill smart-plan
+
+# install for one agent, or for every project of yours
+npx skills add drnhsproject/smart-plan --skill smart-plan -a claude-code
+npx skills add drnhsproject/smart-plan --skill smart-plan -g
+```
+
+Checked on this repository: `--list` finds the skill, and
+`--skill smart-plan -a claude-code` copies `SKILL.md` to
+`.claude/skills/smart-plan/`, identical to this repository. Not checked: the
+interactive agent prompt, and agents other than Claude Code.
+
+The CLI collects anonymous usage data; set `DISABLE_TELEMETRY=1` to opt out.
+It is a third-party tool. Skills run with your agent's permissions, so read
+`SKILL.md` before installing any skill, this one included.
+
+Without the CLI, copy the skill folder yourself:
 
 ```bash
 # all projects (personal)
@@ -44,6 +68,11 @@ cp -R skills/smart-plan <project>/.claude/skills/
 ```
 
 A project skill with the same name overrides the personal one.
+
+### Updating
+
+Updates are manual; installed copies do not change on their own:
+`npx skills check`, then `npx skills update`. Changes are listed in `CHANGELOG.md`.
 
 ## Optional companions
 
