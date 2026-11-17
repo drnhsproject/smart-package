@@ -1,0 +1,66 @@
+[
+ {
+  "trigger": true,
+  "query": "Fix the findings in the QA report .agents/qa/2026/11/16/report.md."
+ },
+ {
+  "trigger": true,
+  "query": "Perbaiki temuan QA yang tadi, mulai dari yang CRITICAL."
+ },
+ {
+  "trigger": true,
+  "query": "/smart-fix"
+ },
+ {
+  "trigger": true,
+  "query": "The QA report found two HIGH issues, please fix them one by one with regression tests."
+ },
+ {
+  "trigger": true,
+  "query": "Tolong perbaiki temuan review di laporan itu."
+ },
+ {
+  "trigger": true,
+  "query": "Fix finding QA-3 from the smart-qa report."
+ },
+ {
+  "trigger": true,
+  "query": "smart-qa selesai dengan verdict FAIL, sekarang perbaiki semua temuannya."
+ },
+ {
+  "trigger": true,
+  "query": "Work through the open findings in the review report and fix each root cause."
+ },
+ {
+  "trigger": false,
+  "query": "Plan how to add CSV export to the report page."
+ },
+ {
+  "trigger": false,
+  "query": "Implement the plan in .agents/plans/2026/11/16/plan.md."
+ },
+ {
+  "trigger": false,
+  "query": "Test what we just built and look for security bugs."
+ },
+ {
+  "trigger": false,
+  "query": "The login button does nothing when clicked, can you debug it?"
+ },
+ {
+  "trigger": false,
+  "query": "Add a dark mode toggle to the settings page."
+ },
+ {
+  "trigger": false,
+  "query": "Explain this stack trace to me."
+ },
+ {
+  "trigger": false,
+  "query": "Rename the variable userData to profile across the project."
+ },
+ {
+  "trigger": false,
+  "query": "Write the README for this repository."
+ }
+]
