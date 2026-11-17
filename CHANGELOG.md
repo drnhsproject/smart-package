@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.1 (2026-11-17)
+
+- `smart-implement` Step 5 gains a short self-check before review: seven recurring defects
+  (unescaped outside text in markup, changed logic without a failing-on-old-code test, literal
+  colors/sizes, busy state with stale data, unstable props to memoized consumers, lost focus,
+  docs that still describe old behaviour). Only items the diff touches apply; a hit outside the
+  plan's scope is reported, not coded. Written from the author's own review history; not yet
+  measured on a run, so it is not known whether it reduces review findings.
+
 ## 0.2.0 (2026-11-16)
 
 Four skills: `smart-plan`, `smart-implement`, `smart-qa`, `smart-fix`. Tried together on one project
@@ -16,7 +25,7 @@ and a clean-project install both match this repository byte for byte (see README
   `smart-qa` run can) and never commits. Written from scratch. First trial (a Next.js portfolio, review report, 2 LOW findings): one
   finding was already fixed in the working tree and was `DISPUTED` with evidence instead of
   edited, the other was reproduced, fixed and re-checked. Review reports use `Resolution:`
-  instead of `Status:`; the skill now says so. Second trial, on a `smart-qa` report (2 LOW findings): one was reproduced, fixed and measured before and after (a chunked upload pulled 30 MB before the cap, 6.3 MB after), the other was `DEFERRED` as a design change and sent back to `smart-plan`. Run by hand from its `SKILL.md`, not yet through an installed skill.
+  instead of `Status:`; the skill now says so. Second trial, on a `smart-qa` report (2 LOW findings): one was reproduced, fixed and measured before and after (a chunked upload pulled 30 MB before the cap, 6.3 MB after), the other was `DEFERRED` as a design change and sent back to `smart-plan`. Run by hand from its `SKILL.md`, not yet through an installed skill. Trigger eval (`evals/triggers-smart-fix.json`, 16 queries, 2 runs, only this skill installed): 15/16 pass, 8/8 negatives silent; the miss is the literal `/smart-fix` query (probably how the runner passes a slash command, not measured otherwise).
 
 - New skill `smart-qa`: tests what `smart-implement` built (bugs, security, regressions),
   writes an evidence-backed report under `.agents/qa/` with a PASS / PASS WITH FOLLOW-UPS / FAIL

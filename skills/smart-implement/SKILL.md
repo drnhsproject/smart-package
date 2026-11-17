@@ -168,6 +168,25 @@ and `tsc --noEmit` whenever a `tsconfig.json` exists, even if the project has no
 compared with the baseline. Report real results; a command that could not run is reported as
 not run, with why. A failing result is Fatal-Stop 3.
 
+**Self-check before review.** These are the defects that reviews of finished work find again
+and again; clearing them yourself saves a review round. Look only at the items the diff
+touches, write `n/a` for the rest, and fix a hit only inside the plan's scope (otherwise it is
+a `Found:` line):
+
+1. Text that came from outside (an API, a database, user input) and now lands in markup, an
+   HTML string, a tooltip, or a map popup is escaped first.
+2. Every changed mapper, parser, fetcher, or hook has a test that would fail on the old code.
+3. Colors, sizes, and spacing come from the project's tokens or constants, not new literals.
+4. A busy indicator follows the real in-flight state, including the case where stale data is
+   shown while fresh data loads.
+5. An object or callback handed to a memoized consumer keeps a stable identity between renders.
+6. When the focused element disappears (back, retry, close), focus moves to a sensible
+   element instead of falling to the page.
+7. Comments, docs, and user-facing text that describe the changed code are changed in the same
+   task, not left stating the old behaviour.
+
+Log one line: `self-check · <n> hit and fixed · <n> found (reported) · <n> n/a`.
+
 ## Step 6 — Review (non-Small plans, unless `--skip-review`)
 
 A **Small** plan (at most 2 files, no contract change, no new module) skips this step and goes
