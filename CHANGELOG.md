@@ -5,8 +5,10 @@
 - The repository was renamed from `drnhsproject/smart-plan` to `drnhsproject/smart-package`. The four
   skills keep their names (`smart-plan`, `smart-implement`, `smart-qa`, `smart-fix`), so installed
   copies and `/smart-plan` keep working. Install with `npx skills add drnhsproject/smart-package ...`;
-  GitHub redirects the old URL. Whether `npx skills update` follows the redirect for copies installed
-  from the old name has not been tested.
+  GitHub redirects the old URL. Checked in a scratch project: `npx skills check` reported an update
+  and `npx skills update -p` refreshed a copy whose lock file still named `drnhsproject/smart-plan`,
+  through the redirect, to the current `main`. The stale copy was simulated (old content, old source,
+  a wrong hash in the lock file), not a real old install, and the global scope (`-g`) was not run.
 
 - README gains "How the skills connect" (each skill is called by hand and stops; a diagram of the
   plan → implement → qa → fix loop) and "Which model for which step" (a suggested model tier per
