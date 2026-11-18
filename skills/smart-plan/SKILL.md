@@ -25,7 +25,7 @@ token spend that still gets it right.
   lint/typecheck/test commands when a baseline is needed for an analysis.
 - After the plan is delivered, STOP. Implementation is a separate step, done by the
   `smart-implement` skill, and only when the user explicitly orders it in a later message
-  ("go", "implement", "proceed"). A question or a tweak request is
+  ("go", "implement", "proceed", or "1" to the Step 8 menu). A question or a tweak request is
   NOT an order: revise the plan instead (Step 7, revisions).
 
 ## Invocation
@@ -188,7 +188,7 @@ Follows: <optional prior plan> · Sibling: <optional parallel plan> · Part: <n 
 ## Risks & trade-offs — including the premortem line
 ## Verification     — the project's real lint / typecheck / test commands, plus any manual check
 ## Open questions   — only if something still needs the user's decision
-## Execution log    — empty; the implementer appends one dated line per event
+## Execution log    — empty; the implementer, `smart-qa` and `smart-fix` append one dated line per event
 ```
 
 **Analysis mode (`--analysis`, or when the user asks "why/how/what" rather than for a change):**
@@ -245,8 +245,19 @@ confirmed, label it `UNVERIFIED` and say how to confirm it.
 ## Step 8 — Stop
 
 End with, in the user's language: a 2–4 line summary of the recommendation, the top risk,
-the saved path (if any), and one line stating that no code was changed and that the user can
-reply "go" (or run `/smart-implement <path>`) to execute the plan. Then stop and wait.
+the saved path (if any), and one line stating that no code was changed. Then offer the next
+step as a numbered choice, with the plan's real file name or ticket filled in (never a
+placeholder):
+
+```
+Next step:
+1. Execute — reply "go" or "1", or run `/smart-implement <plan name or path>`
+2. Revise the plan — reply "2" and say what to change
+```
+
+A reply of "1" or "go" after this menu is the user's own go signal. "2", or any tweak request,
+is a revision: edit the same plan file (bump `Revision`), show what changed in 2–3 lines, and
+offer the same menu again. Never start executing on anything else. Then stop and wait.
 
 ---
 

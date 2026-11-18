@@ -118,6 +118,10 @@ Flow: Locate → Scope → Baseline → Test → Security → Regression → Liv
   probes that cannot write data even if the gate is missing, one origin, about 50 requests.
 - **Verdict**: PASS / PASS WITH FOLLOW-UPS / FAIL, saved to `.agents/qa/`. Nothing is committed
   or pushed.
+- **Tracked in the plan.** Every finding gets an ID (`QA-1`, `QA-2`, ...) and one line in the plan's
+  Execution log with a `[[wikilink]]` to the report; `smart-fix` appends its result the same way
+  (`FIXED` = not yet re-tested; `smart-qa` writes `FIXED-VERIFIED` when the fix holds). The latest line
+  for an ID is its state: `grep -n 'QA-3 ' <plan>`.
 
 ## smart-fix
 

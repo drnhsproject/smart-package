@@ -24,7 +24,7 @@ or command output. A fix you did not run the checks for is not fixed.
   and after, and keep its output as evidence; say that no permanent test was added.
 - **You do not grade your own work.** Never change a finding's verdict, never write PASS.
   You record what you did; `smart-qa` decides whether it holds.
-- Never commit, push, deploy, stage, or publish. Never touch `.agents/` except the report.
+- Never commit, push, deploy, stage, or publish. Never touch `.agents/` except the report and the plan's Execution log (Step 5).
 - Never run destructive commands (database reset or wipe, dropping tables, `rm -rf` on data
   folders, `git reset --hard`, `git clean`, force-push) unless the user approves that exact
   command in the current message. Never write to a real database or a remote service.
@@ -120,6 +120,17 @@ finding's `Status:` line (a review report uses `Resolution:`) to `FIXED`, `DISPU
 ### Found, not fixed
 <file:line — what, one line each>
 ```
+
+Then append to the plan named in the report's `Plan:` line (strip the `[[ ]]`), under
+`## Execution log`, one line per handled finding, append only, nothing else in the plan changed:
+
+```
+YYYY-MM-DD HH:MM FIX: QA-3 FIXED — <files> · regression test <path> · not verified until /smart-qa · [[<report path>]]
+```
+
+Use `DISPUTED` or `DEFERRED` as the result when that is what happened. `FIXED` here means "fixed
+by me, not yet re-tested": only a later `smart-qa` line (`FIXED-VERIFIED`) closes a finding. If
+the report has no `Plan:` line or the plan is gone, skip this and say so.
 
 Rounds count up: a later `/smart-fix` on the same report adds round 2 below round 1.
 Before the first write under `.agents/`, in a git repository, make sure `.agents/` is excluded

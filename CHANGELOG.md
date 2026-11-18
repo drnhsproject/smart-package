@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- `smart-plan` closing message now offers a numbered choice instead of only "go": 1. execute ("go", "1",
+  or `/smart-implement <plan name or path>`, with the real plan name filled in), 2. revise the plan
+  (edits the same file, bumps `Revision`, shows the menu again). Not yet run on a real plan.
+
+- Findings are now tracked in the plan. `smart-qa` appends to the plan's Execution log one summary line
+  and one line per finding (`QA-<n> <severity> OPEN — ... · [[report]]`), and the report's `Plan:` line is
+  a wikilink. `smart-fix` appends `FIX: QA-<n> FIXED|DISPUTED|DEFERRED ...` for each finding it handled;
+  `smart-qa` closes it with `FIXED-VERIFIED` on the next run. Append-only; nothing else in the plan is
+  touched. Not yet run end to end on a real plan.
+
 - The repository was renamed from `drnhsproject/smart-plan` to `drnhsproject/smart-package`. The four
   skills keep their names (`smart-plan`, `smart-implement`, `smart-qa`, `smart-fix`), so installed
   copies and `/smart-plan` keep working. Install with `npx skills add drnhsproject/smart-package ...`;

@@ -18,7 +18,8 @@ output. A finding without evidence from the code or from a command you ran does 
 - **Read-only on product code.** You do not fix what you find. A fix is a follow-up for the
   user to send to `smart-plan` / `smart-implement`. The only files you may create are the QA
   report, throwaway test scripts in a new temporary directory, and, with the user's approval
-  for that exact file, a regression test the project would keep.
+  for that exact file, a regression test the project would keep. The one other write allowed is
+  appending dated lines to the plan's `## Execution log` (Step 8); nothing else in the plan.
 - **Test in a safe place.** Never run a command that writes to a real database, a shared
   system, or a production service. Use the project's test database or fixtures, a dry-run mode,
   or read-only queries. If no safe target exists, say so and mark that check `not run`.
@@ -199,7 +200,7 @@ accepts it; never edit the shared `.gitignore`.
 
 ```markdown
 # QA: <TICKET> <plan title>
-Plan: <path> · Date · Verdict: PASS | PASS WITH FOLLOW-UPS | FAIL
+Plan: [[<plan path>]] · Date · Verdict: PASS | PASS WITH FOLLOW-UPS | FAIL
 Scope: <n files, n accept criteria> · Checks: <n run / n passed / n failed / n not run>
 
 ## Summary
@@ -227,10 +228,29 @@ if only MEDIUM or LOW remain, **or if a check that needs a session was `not run`
 unexercised login-protected fix cannot earn a plain `PASS`). `PASS` only with no findings and no
 `not run` that matters; say plainly if a `not run` weakens the verdict.
 
+### Track it in the plan
+
+Right after saving the report, append to the plan's `## Execution log` (append only; never
+reword Tasks, Findings, Risks, or older log lines, and do not change `Status`). Lines carry the
+report as a wikilink, so the plan alone shows what QA found and where the evidence is:
+
+```
+YYYY-MM-DD HH:MM QA: <verdict> · <n> findings (<n> CRITICAL/HIGH) · [[<report path>]]
+YYYY-MM-DD HH:MM QA-<n> <SEVERITY> OPEN — <summary, one line> · <file:line> · [[<report path>]]
+```
+
+One summary line, then one line per finding, of every severity. No findings: the summary line
+alone (`QA: PASS · 0 findings · [[...]]`). Finding IDs are unique per plan: on a re-run, continue
+numbering after the highest `QA-<n>` already in the plan's log, and for a finding from an earlier
+round that you re-tested, append a new line with its current state (`FIXED-VERIFIED` when the
+fix holds, `OPEN` when it does not) instead of a new ID. A finding's current state is its latest
+line: `grep -n 'QA-3 ' <plan>`. If the plan is not in the project (`--diff`, no plan), skip this.
+Never put a secret value in these lines.
+
 ## Step 9 — Stop
 
 End with, in the user's language: the verdict, counts by severity, the top findings in one line
-each (ID, where, what), checks not run and why, the report path, and the next step: for
+each (ID, where, what), checks not run and why, the report path, that the plan's Execution log was updated, and the next step: for
 a FAIL or follow-ups, suggest `/smart-plan` to plan the fixes (with `Follows:` pointing at this
 plan), then `/smart-implement`, then `/smart-qa` again. State that nothing was changed in the
 product code, committed, or pushed. Then stop and wait.
