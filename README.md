@@ -146,8 +146,10 @@ Flow: Locate → Confirm → Fix → Prove → Record → Stop.
 
 ## How the skills connect
 
-Each skill is called by hand and stops when it is done. None starts the next one for you, so
-you can read the result before moving on.
+Each skill stops when it is done and ends with a numbered next step (for example
+`1. QA now · 2. Self-check only`). Reply with the number to run that step, or ignore the menu and
+call any skill yourself later: `/smart-qa <plan>` and `/smart-fix <report>` work with or without
+the menu. A skill never starts the next one on its own, so you read each result first.
 
 ```
 /smart-plan → (you approve) → /smart-implement → /smart-qa

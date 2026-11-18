@@ -145,7 +145,19 @@ End with, in the user's language: counts (fixed / disputed / deferred), one line
 (ID, result, files), the checks you ran and what they printed, anything deferred and what the
 user must decide, and the report path. Say plainly that nothing was committed or pushed, and
 that **the fix is not verified until `/smart-qa` runs again** on the same plan or ticket. Then
-stop and wait.
+offer the next step as a numbered choice, real paths filled in, and stop and wait:
+
+```
+Next step:
+1. Verify now — reply "1" or run `/smart-qa <plan name or path>`   (Recommended: only QA can write FIXED-VERIFIED)
+2. Fix what is left — `/smart-fix <report>` or `--all` (only when OPEN findings remain)
+3. Plan the deferred ones — `/smart-plan` with `Follows:` the plan (only when something was DEFERRED as too large)
+4. Stop here
+```
+
+Show only the options that apply. A reply that is a number or a command is the user's own order:
+run that skill with the Skill tool, and let it show its own next step; an agent without a Skill
+tool prints the command instead. Anything else starts nothing.
 
 ## Never
 

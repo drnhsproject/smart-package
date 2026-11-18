@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Every skill now ends with a numbered next step, so the chain can be walked by replying with a number
+  or driven one skill at a time. `smart-implement`: 1. QA now, 2. self-check only, 3. fix the review
+  findings (when open); QA is marked Recommended for login, permission, data, money, upload, contract
+  or larger changes. `smart-qa`: after FAIL or follow-ups, fix CRITICAL/HIGH, fix all, fix chosen IDs,
+  plan first, or stop; after PASS, stop or commit. `smart-fix`: verify with QA (recommended), fix what is
+  left, plan the deferred, or stop. A number reply runs that skill via the Skill tool; one skill per
+  reply. Not yet run on a real plan.
+
 - `smart-plan` closing message now offers a numbered choice instead of only "go": 1. execute ("go", "1",
   or `/smart-implement <plan name or path>`, with the real plan name filled in), 2. revise the plan
   (edits the same file, bumps `Revision`, shows the menu again). Not yet run on a real plan.

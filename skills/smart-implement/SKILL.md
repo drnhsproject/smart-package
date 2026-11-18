@@ -266,7 +266,24 @@ The report is not part of the change: Step 5 skips it, and it is committed only 
 End with, in the user's language: tasks done out of total, the final check result, the scope
 trace line, the review outcome, anything found outside the plan (`Found:` / `Deviation:` and
 review follow-ups), the review report's path when one was written, the plan's path and new status, and one line saying nothing was committed
-or pushed and that the user can ask for that. Then stop and wait.
+or pushed and that the user can ask for that. Then offer the next step as a numbered choice, with
+the real plan name and report path filled in (never a placeholder), and stop and wait:
+
+```
+Next step:
+1. QA now — reply "1" or run `/smart-qa <plan name or path>`        (Recommended | optional)
+2. Self-check only — stop here; the Step 5 self-check and the checks above are all that ran
+3. Fix the review findings — reply "3" or run `/smart-fix <review report>`   (only when the review report has OPEN findings)
+```
+
+Mark option 1 `(Recommended)` when the change touches login, permissions, personal data, money,
+uploads, a public contract, or more than 3 files, or the review left a MEDIUM-or-worse finding;
+otherwise mark option 2. Option 2 also lists, in 2–4 lines, what the user can still check by hand
+(`Verify` steps the plan marked manual, `Found:` and `Deviation:` lines). Option 3 is shown only
+when it applies. A reply of "1", "3", or the command is the user's own order: run that skill with
+the Skill tool on this plan (or report), and let it show its own next step when it finishes; an
+agent without a Skill tool prints the command instead. Anything else, including silence, starts
+nothing. Never start a second skill after the first without the user's next reply.
 
 ---
 

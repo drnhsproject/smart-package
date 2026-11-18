@@ -250,10 +250,26 @@ Never put a secret value in these lines.
 ## Step 9 — Stop
 
 End with, in the user's language: the verdict, counts by severity, the top findings in one line
-each (ID, where, what), checks not run and why, the report path, that the plan's Execution log was updated, and the next step: for
-a FAIL or follow-ups, suggest `/smart-plan` to plan the fixes (with `Follows:` pointing at this
-plan), then `/smart-implement`, then `/smart-qa` again. State that nothing was changed in the
-product code, committed, or pushed. Then stop and wait.
+each (ID, where, what), checks not run and why, the report path, that the plan's Execution log was updated, and that nothing was changed in the
+product code, committed, or pushed. Then offer the next step as a numbered choice, real paths and
+IDs filled in, and stop and wait. After a FAIL or follow-ups:
+
+```
+Next step:
+1. Fix CRITICAL and HIGH now — reply "1" or run `/smart-fix <report>`
+2. Fix everything, MEDIUM and LOW too — reply "2" or run `/smart-fix <report> --all`
+3. Fix only some — reply "3 QA-1,QA-4" or run `/smart-fix <report> --id=QA-1,QA-4`
+4. Plan first — `/smart-plan` with `Follows:` this plan, for a finding that needs more than 3 files,
+   a contract or schema change, or a new dependency
+5. Stop here — decide later
+```
+
+Show only the options that apply (no option 2 when there is nothing below HIGH; mark option 4 on
+the findings that need it). After a `PASS`: say it is safe to ship on this evidence and offer
+only "1. Stop here" or "2. Commit" (the user's own commit skill or `git`, never done by this
+skill). A reply that is a number or a command is the user's own order: run that skill with the
+Skill tool on this report, and let it show its own next step; an agent without a Skill tool prints
+the command instead. Anything else starts nothing.
 
 ## Never
 
