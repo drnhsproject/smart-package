@@ -76,8 +76,9 @@ Flow: Clarify → Explore → Rules → Design → Self-check → Output → Sav
 
 Flow: Locate → Check → Approve → Execute → Scope trace → Review → Close → Stop.
 
-- **Checks first.** Open questions answered, earlier parts done, not on `main`/`master`,
-  the cited `file:line` evidence still true, and a lint / test baseline taken before the
+- **Checks first.** Open questions answered, earlier parts done, not on a protected branch
+  (`main`, `master`, `develop`, `staging`, `production`, `release/*`; it offers a feature branch,
+  and asks once if the branch name lacks the plan's ticket), the cited `file:line` evidence still true, and a lint / test baseline taken before the
   first edit. `--dry-run` stops here.
 - **The plan is the scope.** Anything else it finds is logged as `Found:` or `Deviation:`,
   not coded. A task that cannot be done as written stops the run instead of being improvised.
@@ -139,6 +140,45 @@ Flow: Locate → Confirm → Fix → Prove → Record → Stop.
 - **Never grades its own work.** It records the outcome in the same QA report; only a new
   `/smart-qa` run can turn the verdict. Nothing is committed or pushed.
 
+## How the skills connect
+
+Each skill is called by hand and stops when it is done. None starts the next one for you, so
+you can read the result before moving on.
+
+```
+/smart-plan → (you approve) → /smart-implement → /smart-qa
+                                                     │
+                       small findings ──→ /smart-fix → /smart-qa again
+                       design changes ──→ /smart-plan → /smart-implement → /smart-qa
+```
+
+## Which model for which step
+
+A suggestion, not a requirement, and not measured: it is the author's reasoning about where
+a mistake costs the most. Tiers are given first because model names change. Examples are
+the Claude 5 family as of this writing.
+
+| Step | Suggested tier | Why |
+|---|---|---|
+| `/smart-plan` | Strongest (e.g. Opus 5.5) | A wrong plan is carried through every later step. Worth the cost; it runs once per change. |
+| `/smart-implement` | Mid (e.g. Sonnet 5.5) | A good plan leaves little to decide. Use the strongest tier if the plan is thin or the change is risky. |
+| Review subagent (inside `smart-implement`) | Strongest, ideally not the model that wrote the code | A reviewer from the same model tends to share the author's blind spots. |
+| `/smart-qa` | Strongest | Finding bugs and security gaps takes reasoning; a missed one is never reported. |
+| `/smart-fix` | Mid | One small finding at a time, each proved by a regression test. Strongest for security findings. |
+
+Two things the skills can and cannot do about models. They run on whatever model your session
+uses and cannot switch it: change it with `/model` between steps. The one thing they control
+is the reviewer subagent: `/smart-implement <plan> --reviewer-model=opus` and
+`/smart-qa <plan> --reviewer-model=opus` (`opus`, `sonnet`, `haiku` or `fable`). Any other
+value, such as another vendor's model, is refused with a message rather than ignored. To run
+a step on a non-Claude model, run that step from an agent that uses it; the `.agents/` files carry the
+state, but this has not been tried. Every skill also answers `--help` with its usage and stops.
+
+Rules of thumb: spend on the steps that **decide** (plan, QA, review), save on the steps that
+**follow instructions** (implement, fix). If a mid-tier run drifts from the plan or fails
+its checks twice, switch up a tier instead of retrying. Switch models between steps with
+`/model` in Claude Code; the files under `.agents/` carry the state, so nothing is lost.
+
 ## Stays local
 
 Plans, analyses, and review reports under `.agents/` are working notes. On first write the
@@ -156,14 +196,14 @@ With the community `skills` CLI
 
 ```bash
 # see what the repository offers, without installing
-npx skills add drnhsproject/smart-plan --list
+npx skills add drnhsproject/smart-package --list
 
 # install into the current project
-npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implement --skill smart-qa --skill smart-fix
+npx skills add drnhsproject/smart-package --skill smart-plan --skill smart-implement --skill smart-qa --skill smart-fix
 
 # install for one agent, or for every project of yours
-npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implement --skill smart-qa --skill smart-fix -a claude-code
-npx skills add drnhsproject/smart-plan --skill smart-plan --skill smart-implement --skill smart-qa --skill smart-fix -g
+npx skills add drnhsproject/smart-package --skill smart-plan --skill smart-implement --skill smart-qa --skill smart-fix -a claude-code
+npx skills add drnhsproject/smart-package --skill smart-plan --skill smart-implement --skill smart-qa --skill smart-fix -g
 ```
 
 Checked on 2026-11-16, with all four skills in the repository: `--list` found `smart-plan`,

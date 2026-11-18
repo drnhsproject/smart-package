@@ -50,7 +50,11 @@ output. A finding without evidence from the code or from a command you ran does 
 /smart-qa <plan> --quick           Steps 1–3 and the checks of Step 4 only, no subagent
 /smart-qa --diff                   no plan: test the current uncommitted diff (scope is the diff)
 /smart-qa <plan> --live <url>      also probe the deployed site at <url> (Step 7)
+/smart-qa <plan> --reviewer-model=<tier>  model for the Step 7b re-check: opus | sonnet | haiku | fable
+/smart-qa --help                   show this list and stop
 ```
+
+If the argument is `--help` or `-h`, reply with ONLY the usage block above, verbatim, and then this one line: `Model suggestions per step: README, "Which model for which step".` Nothing else: no summary of the steps, no other file read, nothing written, no step started.
 
 Flags combine. `--live` alone (no plan) checks the live site against the most recent plan.
 
@@ -178,7 +182,9 @@ body that holds personal data or a secret; record status, size, and the field na
 ## Step 7b — Independent review of findings
 
 For plans that are not Small (more than 2 files, a contract change, or a new module), have a
-separate subagent (the Agent tool; it must not share your context) re-check every CRITICAL and
+separate subagent (the Agent tool; it must not share your context; with `--reviewer-model=<tier>`
+pass that tier as its `model`, otherwise leave `model` unset; any other value is not guessed at:
+stop and tell the user) re-check every CRITICAL and
 HIGH finding: it gets the finding, the evidence, and the file paths, and answers
 `confirmed` or `not reproducible` with its own evidence. A finding it cannot reproduce is
 downgraded and noted as such. If no subagent can be started, tell the user and continue only

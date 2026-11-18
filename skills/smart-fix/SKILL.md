@@ -40,7 +40,10 @@ or command output. A fix you did not run the checks for is not fixed.
 /smart-fix                              the QA report just written, or the most recent one
 /smart-fix <report> --id=QA-3,QA-5       only those findings
 /smart-fix <report> --all                include MEDIUM and LOW as well
+/smart-fix --help                        show this list and stop
 ```
+
+If the argument is `--help` or `-h`, reply with ONLY the usage block above, verbatim, and then this one line: `Model suggestions per step: README, "Which model for which step".` Nothing else: no summary of the steps, no other file read, nothing written, no step started.
 
 ## Step 1 — Locate
 

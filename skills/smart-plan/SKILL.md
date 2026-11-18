@@ -36,7 +36,10 @@ token spend that still gets it right.
 /smart-plan <task> --no-save                chat only, write nothing
 /smart-plan <task> --scope=<path>           restrict exploration to a path
 /smart-plan <task> --ticket=ABC-123         ticket number to put on the plan and its tasks
+/smart-plan --help                          show this list and stop
 ```
+
+If the argument is `--help` or `-h`, reply with ONLY the usage block above, verbatim, and then this one line: `Model suggestions per step: README, "Which model for which step".` Nothing else: no summary of the steps, no other file read, nothing written, no step started.
 
 Flags combine. Anything else in the argument string is the task description. If no
 description is given, ask what to plan or analyze.

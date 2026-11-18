@@ -47,7 +47,11 @@ you resume from the plan file when the user says "continue".
 /smart-implement <plan> --task=T3      one task (and any BLOCKED_BY it needs) only
 /smart-implement <plan> --dry-run      run Steps 1–2 only, change nothing, report what would happen
 /smart-implement <plan> --skip-review  skip Step 6 (recorded in the log)
+/smart-implement <plan> --reviewer-model=<tier>  model for the Step 6 reviewer: opus | sonnet | haiku | fable
+/smart-implement --help                show this list and stop
 ```
+
+If the argument is `--help` or `-h`, reply with ONLY the usage block above, verbatim, and then this one line: `Model suggestions per step: README, "Which model for which step".` Nothing else: no summary of the steps, no other file read, nothing written, no step started.
 
 Flags combine.
 
@@ -74,9 +78,15 @@ Flags combine.
 - **Open questions**: if the plan has unresolved ones, ask the user now (focused questions,
   recommended option first) and record each answer in the plan under its question.
 - **Part plans**: if `Follows:` names a plan that is not `DONE`, stop and say so.
-- **Repo guard**: in a git repository on `main` or `master`, stop and offer a branch
+- **Repo guard**: in a git repository on a protected branch (`main`, `master`, `develop`,
+  `staging`, `production`, or `release/*`), stop and offer a branch
   (`feature/<ticket>-<slug>`, or `feature/<slug>` with no ticket). Create it only after the
-  user agrees. Never resolve merge conflicts on your own.
+  user agrees. If the user says to work on the protected branch itself, that is their call:
+  ask nothing further, log `branch guard · user chose to work on <branch>` and continue.
+  Commit and push rules are unchanged (never push; commit only when asked). Never resolve merge conflicts on your own.
+  On any other branch, when the plan has a ticket and the branch name does not contain it,
+  warn in one line and ask: continue here, or create `feature/<ticket>-<slug>`? This is a
+  question, never a block (a branch without the ticket can be right). Never push.
 - **Drift check**: for each file the Tasks touch, confirm it still exists and that the
   `file:line` evidence in Findings still holds (narrow `grep -n` or `Read` with a range). If
   something drifted, report what changed and let the user decide: revise the plan with
@@ -193,7 +203,10 @@ A **Small** plan (at most 2 files, no contract change, no new module) skips this
 straight to Step 7. Every other plan gets an independent review.
 
 Delegate to a separate subagent (the Agent tool; it must not share your context, so it is not
-the author). Give it: the plan path, the list of changed files, the pre-run copies directory,
+the author). With `--reviewer-model=<tier>`, pass that tier as the Agent tool's `model`; without
+it, leave `model` unset. Only the four tiers above exist there: any other value (another
+vendor's model, a typo) is not guessed at, so STOP and tell the user it is not available as a
+reviewer, and offer the default reviewer. Log the tier used in the review header. Give it: the plan path, the list of changed files, the pre-run copies directory,
 and these instructions: read-only, never edit; three passes over the changed files only, for
 **bugs** (logic errors, unhandled cases, regressions against the plan's Accept criteria),
 **security** (injection, secrets, unsafe input handling, auth gaps, data exposure), and

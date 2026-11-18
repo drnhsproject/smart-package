@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+- The repository was renamed from `drnhsproject/smart-plan` to `drnhsproject/smart-package`. The four
+  skills keep their names (`smart-plan`, `smart-implement`, `smart-qa`, `smart-fix`), so installed
+  copies and `/smart-plan` keep working. Install with `npx skills add drnhsproject/smart-package ...`;
+  GitHub redirects the old URL. Whether `npx skills update` follows the redirect for copies installed
+  from the old name has not been tested.
+
+- README gains "How the skills connect" (each skill is called by hand and stops; a diagram of the
+  plan → implement → qa → fix loop) and "Which model for which step" (a suggested model tier per
+  step). The model table is the author's reasoning, not measured on any run.
+- `--help` (or `-h`) on all four skills: prints the usage list and stops, touching nothing. Checked once per skill in an isolated project (`claude -p`, only that skill installed): each printed only the usage block and wrote no file.
+- `--reviewer-model=<opus|sonnet|haiku|fable>` on `smart-implement` (Step 6) and `smart-qa`
+  (Step 7b): sets the model of the independent reviewer subagent. Any other value stops with a
+  message instead of being ignored. The skills still cannot switch the session's own model. Not yet run: neither a valid tier nor a refused value has been exercised in a real review.
+
+- `smart-implement` repo guard now also stops on `develop`, `staging`, `production` and `release/*`
+  (before: only `main` and `master`) and offers a feature branch. On other branches, when the
+  plan's ticket is not in the branch name, it asks once whether to continue or branch; it does
+  not block. If the user chooses to work on the protected branch itself, it continues and logs that choice. Not yet run on a real repository.
+
 ## 0.2.1 (2026-11-17)
 
 - `smart-implement` Step 5 gains a short self-check before review: seven recurring defects
