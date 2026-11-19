@@ -141,6 +141,13 @@ No rule folder: say "no written rules found" and follow the conventions visible 
 
 ## Step 3b — Grill (interview until the plan is solid)
 
+**If the `smart-interview` skill is installed, use it for this step**: call it with the open
+decisions from Steps 1–3 and the same cap (8 questions for a Full plan), and take the Decisions list
+it returns as the `## Key decisions` lines (`user`, `evidence`, or `assumed`). It keeps its own state
+in a temp file and asks in rounds of independent questions. If it is not installed, follow the
+procedure below, which is the same interview done inline; the plan must not depend on the other
+skill being present.
+
 Goal: the plan the user approves has no hidden guesses. Walk the decision tree of the task
 branch by branch, resolving each dependency between decisions before the next, the way a
 design interview does. Skipped for a **Small** plan, with `--quick`, and with `--analysis`.
@@ -207,9 +214,25 @@ Each answer becomes a line under `## Key decisions` (decision → rationale, `us
 
 ## Step 5 — Self-check (before any output)
 
-Fix the plan or label the item `UNVERIFIED` when a check fails:
+**Run the script first.** Write the draft plan to a temp file (`${TMPDIR:-/tmp}/smart-plan-draft.md`,
+never inside the project), then run:
 
-- Every `file:line` cited exists (re-check with `grep -n` or a narrow `Read`).
+```
+python3 -I scripts/check-plan.py "${TMPDIR:-/tmp}/smart-plan-draft.md" --root <project root> [--plans-dir <plans folder>]
+```
+
+`scripts/check-plan.py` sits next to this `SKILL.md` (locate it once with `find` if needed; Python 3,
+standard library only). It proves the mechanical part: header fields, required sections, task ids
+(unique, with the header ticket, never pre-checked), `Accept` and `Verify` on every task,
+`BLOCKED_BY` that exists and points backwards, every `file:line` and Reused-code path, the premortem
+line of a full plan, and the cross-part rules of a split (`--plans-dir` finds the sibling parts).
+Fix every `FAIL` line, or label the item `UNVERIFIED`, and run it again until it prints `OK`. Never
+say a check passed that the script did not print. If Python 3 is missing, do the checks below by
+hand and say so in one line. The script does not judge the plan: the remaining checks are yours.
+
+Then fix the plan or label the item `UNVERIFIED` when a check fails:
+
+- Every `file:line` cited exists (the script checks this; by hand, `grep -n` or a narrow `Read`).
 - Every symbol under Reused code exists at the cited path.
 - Every rule cited was actually read in this run.
 - Every task has a file, an acceptance criterion, and a `Verify` the agent can run alone. A check that
