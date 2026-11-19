@@ -102,6 +102,12 @@ newest open plan's `Ticket:`. If none is found, ask once ("Which ticket is this 
 `none` if there is no ticket"). With no ticket, the header says `Ticket: none` and task ids
 are plain `T<n>`. Never invent a ticket number.
 
+**Reuse check.** When the ticket came from the branch name or the newest plan (not from `--ticket=` or
+the user's own message), `grep -rl 'Ticket: <ID>'` over the plans folder. If a plan with that ticket is
+already `DONE`, or covers a different topic, ask once: a new ticket (offer the shape the project's recent
+tickets have), keep this one, or `none`. A ticket names one piece of work: two unrelated plans under one
+ticket share task ids, and `/smart-implement <ticket>` can no longer tell them apart.
+
 ## Step 2 — Explore, smallest context first (token budget discipline)
 
 Work from the smallest scoped context outward. Pass user-supplied keywords to shell
