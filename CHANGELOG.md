@@ -2,6 +2,25 @@
 
 ## Unreleased
 
+- Run on a second model (`adacode-3.0-flash`, 2026-11-19, a git-only plan on the same portfolio project:
+  create a `development` branch and merge three feature branches into it). What it showed: the plan
+  passed `check-plan.py` (`OK`), had the full structure (decisions labelled `user` and `assumed`, tasks with
+  `Accept` and `Verify`, a premortem, a log that honestly recorded that the real commit count was 8, not
+  the 5 it predicted), and every claim in its log matched the git state (counts, tips, the remote branch,
+  `main` untouched). What it did not show: whether the scripts were used (no state file, snapshot or
+  transcript was found, and the run may have used another harness), and its execution log was thinner than
+  `smart-implement` asks (no `approved`, `pre-run state`, `rules`, `baseline`, `scope trace`, `final check`
+  or `self-check` line; tasks logged as `T1 ...` instead of `<TICKET>-T1 done`). So this is evidence that the
+  plan format holds on another model, not proof that the scripts help it.
+  Changes made from it: (1) `smart-implement/scripts/scope-trace.py closeout <plan>` checks those log lines,
+  the `done` line of every ticked task, unticked boxes and unanswered owner checks before a plan is set
+  `DONE`, and `smart-implement` Step 7 runs it; run on the portfolio plans it passes the complete log and
+  reports 15 missing items on the thin one. (2) A task that names no file (a git operation) is a `NOTE` in
+  the scope trace instead of a false `TICKED-NO-HUNK`, and a branch name such as `feat/some-branch` is no
+  longer read as a path unless it exists in the project. (3) `smart-plan` Step 1 asks once when the ticket it
+  took from the branch name already has a `DONE` plan or covers another topic: the run above reused the
+  login ticket for the branch work, so two plans now share the ids `T1` to `T4`.
+
 ## 0.4.0 (2026-11-19)
 
 - First real run of the whole chain on a Next.js portfolio (2026-11-19: `/smart-plan` with `smart-interview`
