@@ -2,23 +2,70 @@
 
 ## Unreleased
 
+## 0.3.0 (2026-11-19)
+
+- Tested end to end on 2026-11-19, and the results written into the
+  README ("Status and known limits"): one real feature in a Next.js and Prisma web project (3 parts, 19
+  tasks: the planning followed this version of `smart-plan`, but implement, QA and fix ran on the older
+  installed copies, so the changes of this release to those three were exercised only on the scratch
+  project) and a scratch project, with this version installed, that ran `/smart-plan` → `/smart-implement` → `/smart-qa` → `/smart-fix` → `/smart-qa --recheck`
+  twice. What the scratch run showed: the interview asked 3 questions in Indonesian with short options;
+  the `Owner-verify` of a task was logged `pending` and later `done — reported by the user`; the owner
+  check and the review decisions were asked in one message; 4 LOW review findings were fixed in one batch
+  with no second reviewer call; and the first `--recheck` caught a fix that only covered part of its
+  finding (an empty or NaN id still gave a bad path), which the second round closed.
+- New: a task has `Verify` (what the agent can run) and an optional `Owner-verify` (a login, a screen, a
+  real device, the owner's data). `smart-implement` ticks on `Verify`, logs `OWNER-VERIFY pending`, asks
+  for all pending owner checks in one message, records the answer as "reported by the user, not run by the
+  agent", and closes the plan only when each is done or knowingly left pending. `smart-qa` lists them
+  under "Checks not run" and never counts a user report as a check it ran. `smart-plan` self-checks that
+  a login-bound check is written as `Owner-verify`.
+- New: `smart-qa --recheck`, the light second pass after `smart-fix` (finding reproduction, one nearby
+  edge, the project's checks, callers of the touched files; no new exploration, no subagent; refused for
+  CRITICAL or HIGH fixes, more than 3 files, or a contract, schema or dependency change). `smart-fix` now
+  proposes it as the verify step when it fits. `smart-qa` also asks for `QA_SESSION_COOKIE` before testing
+  starts, and its menu drops the "fix CRITICAL and HIGH" option when none is open.
+
+- Large plans split into ordered parts, with the rules aligned so they cannot contradict each other.
+  `smart-plan`: one interview for the whole work before the split; all parts written up front with
+  `Part: n of m · Series: <name>` and the same ticket; each task in exactly one part, ids continue
+  across parts, `BLOCKED_BY` only backwards; a shared decision or rule lives once in the earliest part
+  and later parts cite it; a new cross-part self-check; de-duplication no longer treats sibling parts
+  as duplicates, and the "never a second plan for a topic" rule has the split as its exception.
+  `smart-implement`: parts of one series are one work item (lowest open part first), a part started
+  after its predecessor re-checks its cited `file:line` and the predecessor's Found/Deviation lines,
+  and the closing menu offers "Next part". `smart-qa` offers "Next part" after PASS. Run on a real
+  3-part split on 2026-11-19 (first entry).
+
+- Feedback round on the four skills. (1) New "Talking to the user" block in each skill: when the
+  user writes Indonesian, every question, option, summary and the "Next step" menu is Indonesian;
+  option labels are at most 6 words with one short line; summaries keep only the result, the top
+  risk and the next step, in complete short sentences. (2) Fewer wait cycles: `smart-implement`
+  allows 1 review fix round (was 2), fixes all findings in one batch and re-checks only touched
+  hunks; `smart-qa` re-checks all CRITICAL/HIGH in one subagent call and skips findings it already
+  proved; `smart-fix` trusts fresh report evidence and runs lint/typecheck/full suite once after
+  the last finding. (3) `smart-plan` gains Step 3b, a grill-me style interview: after exploring, it
+  answers what the code settles, then asks the rest one question at a time with a recommended
+  option, challenges conflicting answers, caps at 8 questions, and records each answer in Key
+  decisions. Skipped for Small plans, `--quick`, and `--analysis`. Run on a real plan on 2026-11-19 (first entry).
+
 - Every skill now ends with a numbered next step, so the chain can be walked by replying with a number
   or driven one skill at a time. `smart-implement`: 1. QA now, 2. self-check only, 3. fix the review
   findings (when open); QA is marked Recommended for login, permission, data, money, upload, contract
   or larger changes. `smart-qa`: after FAIL or follow-ups, fix CRITICAL/HIGH, fix all, fix chosen IDs,
   plan first, or stop; after PASS, stop or commit. `smart-fix`: verify with QA (recommended), fix what is
   left, plan the deferred, or stop. A number reply runs that skill via the Skill tool; one skill per
-  reply. Not yet run on a real plan.
+  reply. Run on a real plan on 2026-11-19 (first entry).
 
 - `smart-plan` closing message now offers a numbered choice instead of only "go": 1. execute ("go", "1",
   or `/smart-implement <plan name or path>`, with the real plan name filled in), 2. revise the plan
-  (edits the same file, bumps `Revision`, shows the menu again). Not yet run on a real plan.
+  (edits the same file, bumps `Revision`, shows the menu again). Run on a real plan on 2026-11-19 (first entry).
 
 - Findings are now tracked in the plan. `smart-qa` appends to the plan's Execution log one summary line
   and one line per finding (`QA-<n> <severity> OPEN — ... · [[report]]`), and the report's `Plan:` line is
   a wikilink. `smart-fix` appends `FIX: QA-<n> FIXED|DISPUTED|DEFERRED ...` for each finding it handled;
   `smart-qa` closes it with `FIXED-VERIFIED` on the next run. Append-only; nothing else in the plan is
-  touched. Not yet run end to end on a real plan.
+  touched. Run end to end on 2026-11-19 (first entry).
 
 - The repository was renamed from `drnhsproject/smart-plan` to `drnhsproject/smart-package`. The four
   skills keep their names (`smart-plan`, `smart-implement`, `smart-qa`, `smart-fix`), so installed
@@ -80,7 +127,7 @@ and a clean-project install both match this repository byte for byte (see README
 - smart-implement now reads the project's rules when it has any (`AGENTS.md`, `CLAUDE.md`, a
   rules folder) in Step 2, and the Step 6 reviewer gets a fourth pass, "rules", checking the
   change against them. A project with no rules logs `rules · none found`, skips the pass, and
-  carries on: never a blocker. Not yet run on a real plan.
+  carries on: never a blocker. Run on a real plan on 2026-11-19 (first entry).
 
 - First real run (a Next.js portfolio): plan, branch guard, review with a HIGH finding,
   fatal stop, two fix rounds, and report all worked. Lint missed a broken import alias that
