@@ -116,7 +116,11 @@ Flags combine.
   Tasks touch with their modification times). Log one line:
   `pre-run state · <paths or none>`. For each of those files, save a copy in a new
   temporary directory so that later you can tell your changes from what was already there;
-  log the directory.
+  log the directory. In a git project the script does this for you:
+  `python3 -I scripts/scope-trace.py snapshot --root <project root> --out "${TMPDIR:-/tmp}/smart-implement-<ticket>"`
+  (`scripts/` sits next to this `SKILL.md`; locate it once with `find` if needed; Python 3 and `git`
+  only). It prints the `pre-run state` line and keeps the copies; log the directory it names. Without
+  git or Python 3, do it by hand as described.
 - **Keep local.** `.agents/` and the installed skill copies (`.claude/skills/smart-plan/`,
   `.claude/skills/smart-implement/`) are working notes and must not reach the remote. Before
   the first write under `.agents/`, in a git repository: skip a path that `git ls-files` lists
@@ -200,6 +204,20 @@ Prove that the change is the plan and nothing else. Walk every hunk of the chang
   shown to the user, not failed. Whitespace-only changes are reported, not failed.
 - A gitignored or non-git file has no diff: map the file to its task and say so. Without git,
   compare against the pre-run copies and the modification times.
+
+In a git project, run the walk with the script and use its output as the trace:
+
+```
+python3 -I scripts/scope-trace.py trace <plan> --root <project root> --snapshot <snapshot dir> [--allow <path> ...]
+```
+
+It prints the log line below, every `UNMAPPED` hunk, and every `TICKED-NO-HUNK` task, and exits 1
+when either list is not empty. What it cannot judge is whether a hunk in a file no task names is
+direct support for a task (an import, a test for it) or a user decision: decide that yourself, pass
+`--allow <path>` for each such file, and write in the log which of the two it is (an `ALLOWED` line
+is never silently accepted). A `TICKED-NO-HUNK` task is a false check unless its `Verify` only
+writes the log. Do not report a trace the script did not print. Without git or Python 3, walk the
+hunks by hand as above.
 
 Log one line: `scope trace · <n> hunks · <n> mapped · <n> pre-run · <n> format-only · <n> unmapped`,
 naming every unmapped hunk. Any unmapped hunk is Fatal-Stop 4 before review.

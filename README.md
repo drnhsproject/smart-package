@@ -258,7 +258,7 @@ npx skills add drnhsproject/smart-package --skill smart-plan --skill smart-imple
 ```
 
 `smart-interview` is optional: add `--skill smart-interview` to the command, or copy `skills/smart-interview` the same way.
-Two skills carry a helper script (`smart-plan/scripts/check-plan.py`, `smart-interview/scripts/interview.py`); both need Python 3, and each skill falls back to doing the same by hand without it. When copying by hand, copy the whole folder, not only `SKILL.md`.
+Three skills carry a helper script (`smart-plan/scripts/check-plan.py`, `smart-implement/scripts/scope-trace.py`, `smart-interview/scripts/interview.py`); they need Python 3 (and `git` for the scope trace), and each skill falls back to doing the same by hand without it. When copying by hand, copy the whole folder, not only `SKILL.md`.
 
 Checked on 2026-11-16, with all four skills in the repository: `--list` found `smart-plan`,
 `smart-implement`, `smart-qa` and `smart-fix`, and `--skill <name> ... -a claude-code -y` into an empty

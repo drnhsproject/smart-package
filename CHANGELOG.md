@@ -6,6 +6,17 @@
   -a claude-code -y` into an empty git project copies the whole skill folder, including `scripts/`
   (4 files `cmp`-identical to this repository, executable bits kept), and both scripts ran from the
   installed location. Source was a local path, not the GitHub repository.
+- New: `smart-implement/scripts/scope-trace.py` (Python 3 and `git`). `snapshot` keeps the pre-run
+  state and copies before the first edit; `trace` walks every hunk (against `HEAD`, or against the
+  pre-run copy for a file that was already dirty), maps it to the files the plan's tasks name, and
+  prints the exact `scope trace · n hunks · n mapped · n pre-run · n format-only · n unmapped` line plus
+  every unmapped hunk and every ticked task with no hunk. Judgement stays with the model: a hunk in a
+  file no task names is only accepted through an explicit `--allow <path>`, which the log must explain.
+  Tested on a repo with a dirty pre-run file, a mapped edit, a whitespace-only edit, a new file under a
+  directory token, an unnamed file, a deleted file, a changed binary, a ticked task with no change, and
+  a snapshot kept inside the project; the tests found and fixed two mistakes in the script (the
+  snapshot folder counted as a change, and a changed binary file not seen). Not yet run inside a live
+  `/smart-implement` session.
 - New: `smart-plan/scripts/check-plan.py`, the mechanical half of Step 5 as a script (Python 3, standard
   library). It checks the header, required sections, task ids (unique, header ticket, never pre-checked),
   `Accept` and `Verify` on every task, `BLOCKED_BY` that exists and points backwards, every `file:line`
