@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.4.1 (2026-11-19)
+
+- The owner reports a run of these changes on a second model as OK (2026-11-19); the details were not
+  recorded here, so whether the scripts help another model stays unproven by this file (see the second-model
+  run below).
+
 - Run on a second model (`adacode-3.0-flash`, 2026-11-19, a git-only plan on the same portfolio project:
   create a `development` branch and merge three feature branches into it). What it showed: the plan
   passed `check-plan.py` (`OK`), had the full structure (decisions labelled `user` and `assumed`, tasks with
