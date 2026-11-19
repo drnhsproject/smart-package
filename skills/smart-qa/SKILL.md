@@ -13,6 +13,18 @@ what you find, with proof. Flow:
 You read the real repository state and test it. Never invent results, findings, or command
 output. A finding without evidence from the code or from a command you ran does not exist.
 
+## Talking to the user
+
+- **Language.** Reply in the language the user writes in, for everything they read: questions,
+  option labels, option descriptions, summaries, and the "Next step" menu. A user writing
+  Indonesian gets Indonesian everywhere; never mix in English labels. Only file content (the plan,
+  reports, code) keeps its own language rule.
+- **Options stay short.** A label of at most 6 words, plus at most one line (about 12 words) on
+  the consequence. No paragraphs inside an option.
+- **Summaries carry only what matters**: the result, the top risk or problem, and the next
+  step. Complete short sentences; do not clip words into telegraph style, and do not repeat what
+  the saved file already says.
+
 ## Hard rules
 
 - **Read-only on product code.** You do not fix what you find. A fix is a follow-up for the
@@ -39,6 +51,7 @@ output. A finding without evidence from the code or from a command you ran does 
   variable the user sets themselves (Step 3, "Test session").
 - Report real results. A check that could not run is `not run`, with the reason. Never write
   "should be fine".
+- A recheck (`--recheck`) is the only shortened mode that may write `FIXED-VERIFIED`; `--quick` never does.
 - Test the change, not the whole product: a bug in code the change did not touch is a
   `Found:` line, not a verdict reason.
 
@@ -49,6 +62,7 @@ output. A finding without evidence from the code or from a command you ran does 
 /smart-qa ABC-123                  test the plan of that ticket
 /smart-qa                         test the plan just implemented, or the most recent DONE / IN PROGRESS one
 /smart-qa <plan> --quick           Steps 1–3 and the checks of Step 4 only, no subagent
+/smart-qa <plan> --recheck         only re-test the findings the plan's log marks FIXED, plus a quick regression
 /smart-qa --diff                   no plan: test the current uncommitted diff (scope is the diff)
 /smart-qa <plan> --live <url>      also probe the deployed site at <url> (Step 7)
 /smart-qa <plan> --reviewer-model=<tier>  model for the Step 7b re-check: opus | sonnet | haiku | fable
@@ -100,13 +114,39 @@ Most fixes sit behind a login, and a QA that cannot log in cannot test them. Dec
 
 1. **Local test setup** — a test database, fixtures, or a seeded test user the project already
    has (`.env.test`, a seed script, the test runner's own setup). Use it; it is the best option.
-2. **A session from the user** — ask once, in one line: "Set `QA_SESSION_COOKIE` (name=value) in
+2. **A session from the user** — ask once, in one line, before Step 4 starts (not afterwards): "Set `QA_SESSION_COOKIE` (name=value) in
    your shell, or tell me to skip." Read it from the environment only; do not echo it, log it,
    or put it in the report. Use it only against the target the user named.
 3. **Neither** — every check that needs a session is logged `not run — no session`, and the
    verdict cannot be a plain `PASS` (Step 8).
 
 Never create users, reset passwords, or touch a real database to obtain a session.
+
+### Owner-verify lines
+
+If the plan's Execution log carries `OWNER-VERIFY` lines, list each under "Checks not run" with its
+state from the log: `pending`, or `done — reported by the user`. A check reported by the user is context,
+not a check you ran: it never counts as run, and it does not remove the `not run` that keeps a login-bound
+change from a plain `PASS`.
+
+## Recheck mode (`--recheck`)
+
+For a change that is already tested and was then repaired, a full pass costs more than it proves. With
+`--recheck`, do ONLY this, and say in the report that it was a recheck:
+
+1. Re-test each finding whose latest log line is `FIX: ... FIXED` (`grep -n 'QA-<n> ' <plan>`) with its
+   own `Reproduction`, plus one nearby edge for it. `OPEN` findings that no fix touched are listed, not
+   re-tested.
+2. Run the baseline commands (typecheck, lint, the project's tests) and the plan's Verification commands,
+   compared with the last round.
+3. `grep` the callers of every file the fix touched (`git diff` against the round before, or the files
+   named in the `FIX:` lines) and check they still work.
+4. No new exploration, no Step 7b subagent, no `--live`.
+
+Do not use a recheck when a fix touched a CRITICAL or HIGH finding, more than 3 files, a contract, a
+schema, or a new dependency: run the full QA instead and say why. Write the round as in Step 8
+(`FIXED-VERIFIED` or `OPEN` per finding). A recheck can only keep or lower trust: if anything unexpected
+shows up, stop the recheck and run the full QA.
 
 ## Step 4 — Test (bugs)
 
@@ -186,8 +226,10 @@ For plans that are not Small (more than 2 files, a contract change, or a new mod
 separate subagent (the Agent tool; it must not share your context; with `--reviewer-model=<tier>`
 pass that tier as its `model`, otherwise leave `model` unset; any other value is not guessed at:
 stop and tell the user) re-check every CRITICAL and
-HIGH finding: it gets the finding, the evidence, and the file paths, and answers
-`confirmed` or `not reproducible` with its own evidence. A finding it cannot reproduce is
+HIGH finding **in one call for all of them** (never one call per finding), skipping any finding
+you already proved by running its own command in this run: it gets the findings, the evidence,
+and the file paths, and answers `confirmed` or `not reproducible` for each with its own evidence.
+This check runs once per run; do not repeat it. A finding it cannot reproduce is
 downgraded and noted as such. If no subagent can be started, tell the user and continue only
 if they choose to; log it as `findings not independently checked`. Never fall back silently.
 
@@ -260,13 +302,15 @@ Next step:
 2. Fix everything, MEDIUM and LOW too — reply "2" or run `/smart-fix <report> --all`
 3. Fix only some — reply "3 QA-1,QA-4" or run `/smart-fix <report> --id=QA-1,QA-4`
 4. Plan first — `/smart-plan` with `Follows:` this plan, for a finding that needs more than 3 files,
-   a contract or schema change, or a new dependency
+   a contract or schema change, or a new dependency (that plan has no `Part:` line; it follows this part, it is not part n+1)
 5. Stop here — decide later
 ```
 
-Show only the options that apply (no option 2 when there is nothing below HIGH; mark option 4 on
-the findings that need it). After a `PASS`: say it is safe to ship on this evidence and offer
-only "1. Stop here" or "2. Commit" (the user's own commit skill or `git`, never done by this
+Show only the options that apply, renumbered: no option 1 when no CRITICAL or HIGH finding is open (the
+first fix option is then "fix everything", with `--all`), no "fix everything" option when there is nothing
+below HIGH, and mark the plan-first option on the findings that need it. After a `PASS`: say it is safe to ship on this evidence and offer
+only "1. Stop here" or "2. Commit", plus "Next part" (`/smart-implement <next part path>`) when the plan
+is Part n of m with n < m (the user's own commit skill or `git`, never done by this
 skill). A reply that is a number or a command is the user's own order: run that skill with the
 Skill tool on this report, and let it show its own next step; an agent without a Skill tool prints
 the command instead. Anything else starts nothing.

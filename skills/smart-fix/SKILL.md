@@ -12,6 +12,18 @@ you repair what it proved, and `smart-qa` then tests again. Flow:
 You work from findings that already exist on paper. You never invent a finding, a result,
 or command output. A fix you did not run the checks for is not fixed.
 
+## Talking to the user
+
+- **Language.** Reply in the language the user writes in, for everything they read: questions,
+  option labels, option descriptions, summaries, and the "Next step" menu. A user writing
+  Indonesian gets Indonesian everywhere; never mix in English labels. Only file content (the plan,
+  reports, code) keeps its own language rule.
+- **Options stay short.** A label of at most 6 words, plus at most one line (about 12 words) on
+  the consequence. No paragraphs inside an option.
+- **Summaries carry only what matters**: the result, the top risk or problem, and the next
+  step. Complete short sentences; do not clip words into telegraph style, and do not repeat what
+  the saved file already says.
+
 ## Hard rules
 
 - **One finding at a time**, most severe first (CRITICAL → LOW). Finish and prove one
@@ -63,7 +75,9 @@ If the argument is `--help` or `-h`, reply with ONLY the usage block above, verb
 ## Step 2 — Confirm (per finding)
 
 Before changing anything, reproduce the finding with its own `Reproduction` steps, or read the
-cited `file:line`. Three outcomes:
+cited `file:line`. When the report is from this session, or `git diff` shows the cited file has not
+changed since the report was written, its evidence is current: do not re-run an expensive
+reproduction, only read the cited line to confirm it is still there. Three outcomes:
 
 - **Reproduced** → go on to Step 3.
 - **Not reproducible** (already fixed, wrong line, guarded elsewhere) → do not edit code. Record
@@ -94,9 +108,10 @@ two findings need contradicting fixes.
 1. Run the new test: it must **fail on the old code and pass on the new**. To show the old
    behaviour without `git stash` or a reset, keep a copy of the original file in a temporary
    directory, or reason from the run you did in Step 2.
-2. Run the project's lint, typecheck (`tsc --noEmit` when a `tsconfig.json` exists), and the
-   tests of the files you touched and of the files that import them. Then the full suite once
-   after the last finding.
+2. Per finding, run only the new test and the tests of the files you touched. After the **last**
+   finding, run the project's lint, typecheck (`tsc --noEmit` when a `tsconfig.json` exists), and
+   the full suite once, together. Run lint or typecheck per finding only when that fix changed a
+   shared type, export, or config. Do not repeat a check that nothing since has invalidated.
 3. A failure caused by your change: fix it, up to 2 attempts. Still failing: restore the
    file to its state before you touched it, record `DEFERRED` with the failing output, and go on.
    A failure that also happens without your change is `pre-existing`: report it, do not fix it.
@@ -149,11 +164,15 @@ offer the next step as a numbered choice, real paths filled in, and stop and wai
 
 ```
 Next step:
-1. Verify now — reply "1" or run `/smart-qa <plan name or path>`   (Recommended: only QA can write FIXED-VERIFIED)
+1. Verify now — reply "1" or run `/smart-qa <plan name or path> --recheck`   (Recommended: only QA can write FIXED-VERIFIED)
 2. Fix what is left — `/smart-fix <report>` or `--all` (only when OPEN findings remain)
 3. Plan the deferred ones — `/smart-plan` with `Follows:` the plan (only when something was DEFERRED as too large)
 4. Stop here
 ```
+
+Option 1 is the light recheck when every finding you handled was MEDIUM or LOW and you touched at most 3
+files with no contract, schema or dependency change; otherwise write the full `/smart-qa <plan name or path>`
+(no `--recheck`) and say in one line why the full pass is needed.
 
 Show only the options that apply. A reply that is a number or a command is the user's own order:
 run that skill with the Skill tool, and let it show its own next step; an agent without a Skill
