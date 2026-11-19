@@ -232,11 +232,11 @@ its checks twice, switch up a tier instead of retrying. Switch models between st
 
 ## Stays local
 
-Plans, analyses, and review reports under `.agents/` are working notes. On first write the
-skills add `.agents/` (and their own installed copies, when untracked) to the repository's
-`.git/info/exclude`: local to your clone, so nothing reaches the remote and your
-`.gitignore` is untouched. Paths your project already tracks are left alone, and
-`smart-implement` never stages `.agents/` or uses `git add -A`.
+Plans, analyses, and review reports under `.agents/` are working notes. The skills never edit
+your git configuration. On first write, if `.agents/` is neither tracked nor ignored, they
+print one `NOTICE keep-local` line with the exact command to run yourself
+(`echo '.agents/' >> "$(git rev-parse --git-path info/exclude)"`), so nothing reaches the remote
+unless you choose otherwise. `smart-implement` never stages `.agents/` or uses `git add -A`.
 
 ## Install
 

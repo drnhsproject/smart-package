@@ -311,12 +311,14 @@ confirmed, label it `UNVERIFIED` and say how to confirm it.
   revised plan keeps its original file and folder.
 - Analyses: `<analysis folder>/YYYY/MM/DD/YYYY-MM-DD-<kebab-name>.md`, dated by the day
   written. Create date folders if missing. Supporting data files go in the same folder.
-- **Keep local.** `.agents/` and the installed skill copies (`.claude/skills/smart-plan/`,
-  `.claude/skills/smart-implement/`) are working notes and must not reach the remote. Before
-  the first write under `.agents/`, in a git repository: skip a path that `git ls-files` lists
-  (the project tracks it on purpose) or that `git check-ignore -q` accepts; append the rest to
-  `$(git rev-parse --git-path info/exclude)`, never to the shared `.gitignore`, and say so in
-  one line. Folders the project already uses (`docs/plans/`, `plans/`) are left alone.
+- **Keep local (notice only, never edit git config).** `.agents/` holds working notes that
+  should not reach the remote, but this skill writes only inside `.agents/` and never edits
+  `.gitignore`, `.git/info/exclude`, or any other git or project configuration. Before the
+  first write under `.agents/`, in a git repository: if `git ls-files` lists the path (tracked
+  on purpose) or `git check-ignore -q` accepts it, say nothing. Otherwise print this notice once,
+  then carry on with the task:
+  `NOTICE keep-local: .agents/ is not git-ignored. This skill did not change git config. If you do not want these notes committed, run: echo '.agents/' >> "$(git rev-parse --git-path info/exclude)"`
+  Folders the project already uses (`docs/plans/`, `plans/`) need no notice.
 - **De-duplicate before writing**: `grep -rilF -- '<topic keywords>'` over the plans and
   analysis folders, and `find` for the same kebab-name. Sibling parts of one `Series` are NOT
   duplicates of each other: compare a part only with a file of the same `Series` and `Part`.

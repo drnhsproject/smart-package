@@ -26,7 +26,9 @@ SOURCES = ("user", "evidence", "assumed")
 
 
 def die(msg, code=2):
-    print(f"error: {msg}", file=sys.stderr)
+    print(f"ERROR [interview.py]: {msg}", file=sys.stderr)
+    print("NEXT: do not repeat the same command unchanged. Fix the cause named above "
+          "(or tell the user if it is outside your control), then run it again.", file=sys.stderr)
     sys.exit(code)
 
 

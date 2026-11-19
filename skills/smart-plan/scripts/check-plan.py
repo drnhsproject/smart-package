@@ -224,7 +224,9 @@ def main():
     a = ap.parse_args()
     plan = Path(a.plan)
     if not plan.is_file():
-        print(f"error: {plan} is not a file", file=sys.stderr)
+        print(f"ERROR [check-plan.py]: {plan} is not a file", file=sys.stderr)
+        print("NEXT: pass the path of the saved plan Markdown file (check it with `ls`), then run again.",
+              file=sys.stderr)
         sys.exit(2)
     root = Path(a.root)
     text = plan.read_text(errors="ignore")

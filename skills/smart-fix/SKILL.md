@@ -148,8 +148,9 @@ by me, not yet re-tested": only a later `smart-qa` line (`FIXED-VERIFIED`) close
 the report has no `Plan:` line or the plan is gone, skip this and say so.
 
 Rounds count up: a later `/smart-fix` on the same report adds round 2 below round 1.
-Before the first write under `.agents/`, in a git repository, make sure `.agents/` is excluded
-(`$(git rev-parse --git-path info/exclude)`), as `smart-qa` does. Never edit the shared `.gitignore`.
+Before the first write under `.agents/`, in a git repository, give the same one-time
+`NOTICE keep-local` as `smart-qa` (Step 8) when `.agents/` is neither tracked nor ignored.
+Never edit `.gitignore`, `.git/info/exclude`, or any other git configuration.
 
 Compare the final `git status` with the one from Step 1: every changed file must trace to a
 finding. An unexplained change is reverted if it is yours, or reported if it is not.

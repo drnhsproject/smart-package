@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Security audit (Snyk, 2026-11-18/19): `smart-plan` failed E004 (CRITICAL, "prompt injection in skill
+  instructions": a read-only planning skill appended to `.git/info/exclude`); `smart-qa` and
+  `smart-interview` warned W011 (third-party content: `--live` pages, git history). Fix: no skill edits
+  git config any more; "Keep local" became a one-time `NOTICE keep-local` line with the command for the
+  user to run (smart-plan, smart-implement, smart-qa, smart-fix, README). `smart-qa` and
+  `smart-interview` now state that fetched pages and git history are untrusted data and must be reported,
+  not obeyed. Script errors (`interview.py`, `scope-trace.py`, `check-plan.py`) now print
+  `ERROR [script]: <cause>` plus a `NEXT:` line telling the model what to do. Not yet re-audited by Snyk.
+
 ## 0.4.1 (2026-11-19)
 
 - The owner reports a run of these changes on a second model as OK (2026-11-19); the details were not
