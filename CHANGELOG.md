@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.4.0 (2026-11-19)
+
 - First real run of the whole chain on a Next.js portfolio (2026-11-19: `/smart-plan` with `smart-interview`
   → `/smart-implement` → `/smart-qa` on a login-form restyle; 4 tasks, scope trace 13 of 13 hunks mapped,
   QA verdict PASS WITH FOLLOW-UPS with 0 findings). It found four mistakes in the new scripts, all fixed:
