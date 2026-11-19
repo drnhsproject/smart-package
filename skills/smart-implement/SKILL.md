@@ -304,6 +304,14 @@ The report is not part of the change: Step 5 skips it, and it is committed only 
 
 ## Step 7 — Close
 
+- Before setting `DONE`, run `python3 -I scripts/scope-trace.py closeout <plan>` (next to this
+  `SKILL.md`; Python 3 only). It checks that the log carries every line the run owes (`approved`,
+  `pre-run state`, `rules`, `baseline`, `scope trace`, `final check`, `self-check`, a review line), that
+  each ticked task has its `<TICKET>-T<n> done` line, that no box is left unticked, and that every
+  `OWNER-VERIFY pending` was answered. Fix every `MISSING` line first. A plan with no code change (a git
+  or other non-file operation) owes the same lines: its `scope trace` line says `0 hunks`, and a line
+  such as `baseline · n/a (git-only plan)` is enough where nothing applies. Without Python 3, check the
+  list by hand.
 - All tasks ticked, scope trace clean, final check passed, review done or skipped on record, and
   every `OWNER-VERIFY` either `done` (reported by the user) or knowingly left `pending` by the user
   (log `OWNER-VERIFY left pending by the user: <ids>`): set `Status: DONE · Completed: YYYY-MM-DD`, add the log line

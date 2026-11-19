@@ -10,6 +10,13 @@
         scope trace · <n> hunks · <n> mapped · <n> pre-run · <n> format-only · <n> unmapped
       followed by every unmapped hunk and every ticked task that has no hunk.
 
+  scope-trace.py closeout PLAN
+      Before setting a plan DONE: check that the Execution log carries every line the run owes
+      (approved, pre-run state, rules, baseline, scope trace, final check, self-check, review), that
+      every ticked task has its `done` line, that no box is left unticked, and that every
+      OWNER-VERIFY pending was answered. Prints MISSING lines, exits 1 when any is missing. Works
+      for a plan with no code change too: such a plan still logs `scope trace · 0 hunks ...`.
+
 What it proves: which hunks fall in files a task names, which were already there, which are
 whitespace-only. What it cannot judge: whether a hunk in a file no task names is direct support
 for a task (an import, a test for it) or a user decision. The model decides that and passes
@@ -112,7 +119,15 @@ def squash(lines):
     return "".join("".join(lines).split())
 
 
-def task_files(plan):
+def looks_like_file(token, root):
+    """A token is a file or directory when it has a letter-led extension, ends with a slash, or exists
+    in the project. A branch name such as `feat/banner-cms-crud` has none of these."""
+    if re.search(r"\.[A-Za-z][A-Za-z0-9]{0,5}$", token) or token.endswith("/"):
+        return True
+    return root is not None and "/" in token and (Path(root) / token).exists()
+
+
+def task_files(plan, root=None):
     tasks = []
     for ln in Path(plan).read_text(errors="ignore").splitlines():
         m = TASK.match(ln)
@@ -122,7 +137,7 @@ def task_files(plan):
         toks = set()
         for a, b in PATHISH.findall(before):
             t = (a or b).strip("`,;:()").rstrip(".")  # keep a leading dot: `.agents/...` is a real path
-            if "/" in t or re.search(r"\.[A-Za-z0-9]{1,6}$", t):
+            if ("/" in t or re.search(r"\.[A-Za-z0-9]{1,6}$", t)) and looks_like_file(t, root):
                 toks.add(t)
         tid = m["id"]
         tasks.append({"id": tid, "ticked": m["box"] != " ", "files": toks})
@@ -177,7 +192,7 @@ def cmd_trace(a):
         die(f"no valid snapshot in {snap}; run `snapshot` before the first edit")
     if not Path(a.plan).is_file():
         die(f"{a.plan} is not a file")
-    tasks = task_files(a.plan)
+    tasks = task_files(a.plan, root)
     allow = set(a.allow or [])
     total = mapped = prerun = fmt = 0
     unmapped, allowed, touched_by_task = [], [], {}
@@ -218,7 +233,10 @@ def cmd_trace(a):
     for t in tasks:
         if not t["ticked"] or t["id"] in touched_by_task:
             continue
-        if bookkeeping_only(t):
+        if not t["files"]:
+            print(f"NOTE {t['id']} names no file (a git or other non-file task): no hunk expected, "
+                  f"its Verify is the proof")
+        elif bookkeeping_only(t):
             print(f"NOTE {t['id']} names only bookkeeping paths (.agents/ ...): no hunk expected")
         else:
             ghosts.append(t["id"])
@@ -229,6 +247,52 @@ def cmd_trace(a):
     sys.exit(1 if unmapped or ghosts else 0)
 
 
+LOG_LINES = [
+    ("approved", r"\bapproved\b"),
+    ("pre-run state", r"pre-run state"),
+    ("rules", r"\brules\s*·"),
+    ("baseline", r"\bbaseline\b"),
+    ("scope trace", r"scope trace\s*·\s*\d+\s+hunks"),
+    ("final check", r"final check"),
+    ("self-check", r"self-check\s*·"),
+    ("review (a `Review:` line, `Review skipped` or `Review ran inline`)", r"\bReview( skipped|:| ran inline)"),
+]
+
+
+def cmd_closeout(a):
+    plan = Path(a.plan)
+    if not plan.is_file():
+        die(f"{a.plan} is not a file")
+    text = plan.read_text(errors="ignore")
+    m = re.search(r"^## Execution log\s*$", text, re.M)
+    if not m:
+        die("the plan has no `## Execution log` section")
+    log = text[m.end():]
+    missing = []
+    for name, pat in LOG_LINES:
+        if not re.search(pat, log):
+            missing.append(f"the log has no `{name}` line")
+    tasks = task_files(a.plan)
+    for t in tasks:
+        if t["ticked"] and not re.search(rf"{re.escape(t['id'])}\s+done\b", log):
+            missing.append(f"{t['id']} is ticked but has no `{t['id']} done` line")
+        if not t["ticked"]:
+            missing.append(f"{t['id']} is not ticked")
+    for pend in re.findall(r"(\S+)\s+OWNER-VERIFY pending", log):
+        answered = re.search(rf"{re.escape(pend)}\s+OWNER-VERIFY (done|failed)", log) or \
+            re.search(r"OWNER-VERIFY left pending by the user[^\n]*" + re.escape(pend), log)
+        if not answered:
+            missing.append(f"{pend} OWNER-VERIFY is still pending (done, failed, or left pending by the user is needed)")
+    if not tasks:
+        missing.append("the plan has no task lines")
+    for line in missing:
+        print(f"MISSING {line}")
+    if missing:
+        print(f"{len(missing)} item(s) missing: do not set Status DONE yet")
+        sys.exit(1)
+    print("OK closeout: every line the run owes is in the log, every task is ticked, every owner check is answered")
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -237,6 +301,7 @@ def main():
     t = sub.add_parser("trace"); t.add_argument("plan"); t.add_argument("--root", default=".")
     t.add_argument("--snapshot", required=True); t.add_argument("--allow", action="append")
     t.set_defaults(f=cmd_trace)
+    c = sub.add_parser("closeout"); c.add_argument("plan"); c.set_defaults(f=cmd_closeout)
     a = p.parse_args()
     a.f(a)
 
