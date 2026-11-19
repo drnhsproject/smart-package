@@ -10,6 +10,10 @@ A set of Agent Skills for one loop: plan, build, test, repair.
 
 - **`smart-qa`** tries to break what was built and writes an evidence-backed report.
 - **`smart-fix`** repairs the findings of that report, one at a time, with a regression test each.
+- **`smart-interview`** (optional, stands alone) stress-tests an idea or decision before you commit to
+  it: it settles what the code and rules already answer, then asks only the real choices in rounds,
+  each with a recommended answer, and hands back a decision record. It writes nothing by default.
+  Use it before `/smart-plan` when the idea is still vague, or for a non-code decision (`--no-lookup`).
 
 Each is instructed to stay inside its role (`smart-plan` never edits code,
 `smart-implement` never goes beyond the plan, `smart-qa` never edits product code,
@@ -252,6 +256,9 @@ npx skills add drnhsproject/smart-package --skill smart-plan --skill smart-imple
 npx skills add drnhsproject/smart-package --skill smart-plan --skill smart-implement --skill smart-qa --skill smart-fix -a claude-code
 npx skills add drnhsproject/smart-package --skill smart-plan --skill smart-implement --skill smart-qa --skill smart-fix -g
 ```
+
+`smart-interview` is optional: add `--skill smart-interview` to the command, or copy `skills/smart-interview` the same way.
+Two skills carry a helper script (`smart-plan/scripts/check-plan.py`, `smart-interview/scripts/interview.py`); both need Python 3, and each skill falls back to doing the same by hand without it. When copying by hand, copy the whole folder, not only `SKILL.md`.
 
 Checked on 2026-11-16, with all four skills in the repository: `--list` found `smart-plan`,
 `smart-implement`, `smart-qa` and `smart-fix`, and `--skill <name> ... -a claude-code -y` into an empty

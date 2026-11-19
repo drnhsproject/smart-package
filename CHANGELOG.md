@@ -2,6 +2,37 @@
 
 ## Unreleased
 
+- Checked on 2026-11-19: `npx skills@latest add <local path> --skill smart-plan --skill smart-interview
+  -a claude-code -y` into an empty git project copies the whole skill folder, including `scripts/`
+  (4 files `cmp`-identical to this repository, executable bits kept), and both scripts ran from the
+  installed location. Source was a local path, not the GitHub repository.
+- New: `smart-plan/scripts/check-plan.py`, the mechanical half of Step 5 as a script (Python 3, standard
+  library). It checks the header, required sections, task ids (unique, header ticket, never pre-checked),
+  `Accept` and `Verify` on every task, `BLOCKED_BY` that exists and points backwards, every `file:line`
+  and Reused-code path against the real files, the premortem line of a full plan, and across the parts of
+  a split plan (unique ids, parts numbered without gaps, no dependency on a later part). Tested on a
+  correct plan, a plan with 16 seeded defects, and a 3-part series; the tests found and fixed two
+  mistakes in the script itself (a premortem demanded of short plans, and a valid dependency on an
+  earlier part rejected). It does not judge the plan or check that a cited symbol exists.
+
+- New: `smart-interview`, a standalone skill that interviews you about an idea or decision until no
+  hidden guess is left. It answers from evidence first (code, rules, history), asks only the real
+  choices in rounds (every decision whose prerequisites are settled is asked together, then the rest is
+  recomputed), gives each question a recommended option, challenges answers that clash, records "you
+  decide" as `assumed`, caps at 8 questions (`--rounds=<n>`), and returns a decision record. It writes
+  nothing unless you agree to add agreed terms to a glossary the project already has.
+  The exact parts run in `skills/smart-interview/scripts/interview.py` (Python 3, standard library):
+  which decisions are ready, the question cap, and the final record, kept in one JSON state file in the
+  temp directory so a trimmed context cannot lose them. Tested on a dependency chain, a cycle, an
+  unknown dependency, the cap, and bad input; the skill falls back to doing the same by hand when Python
+  is missing. `smart-plan`'s
+  Step 3b now uses it when it is installed and otherwise runs the same interview inline, so the plan
+  never depends on the other skill being present. Trigger eval (`evals/triggers-smart-interview.json`,
+  16 queries, 1 run, only this skill installed): 15/16 pass, 8/8 negatives silent (plan, fix, commit,
+  QA and plain questions); the miss is the literal `/smart-interview` query, the same pattern as
+  `smart-fix` (probably how the runner passes a slash command, not measured otherwise). Not yet tested
+  on a real topic in a live session.
+
 ## 0.3.0 (2026-11-19)
 
 - Tested end to end on 2026-11-19, and the results written into the

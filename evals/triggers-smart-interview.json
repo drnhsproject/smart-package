@@ -1,0 +1,66 @@
+[
+ {
+  "trigger": true,
+  "query": "/smart-interview"
+ },
+ {
+  "trigger": true,
+  "query": "Stress-test my plan to move the auth to a separate service before I commit to it."
+ },
+ {
+  "trigger": true,
+  "query": "Grill me on this idea: a monthly credit system for the API."
+ },
+ {
+  "trigger": true,
+  "query": "Tolong cecar rencana saya soal migrasi ke multi-tenant, tanya semua yang belum jelas."
+ },
+ {
+  "trigger": true,
+  "query": "Interview me before we start building the invoice export, I have only a vague idea."
+ },
+ {
+  "trigger": true,
+  "query": "Uji ide saya: pakai satu database untuk semua cabang, apa saja keputusan yang belum saya putuskan?"
+ },
+ {
+  "trigger": true,
+  "query": "Challenge my decision to rewrite the checkout page in a new framework. Ask me the hard questions."
+ },
+ {
+  "trigger": true,
+  "query": "Saya mau mulai fitur notifikasi tapi masih kabur. Wawancarai saya dulu sampai jelas."
+ },
+ {
+  "trigger": false,
+  "query": "Make a plan to add CSV export to the report page."
+ },
+ {
+  "trigger": false,
+  "query": "Fix the failing test in src/billing/invoice.test.ts."
+ },
+ {
+  "trigger": false,
+  "query": "What does the function calculateTotal do?"
+ },
+ {
+  "trigger": false,
+  "query": "Tolong buatkan rencana implementasi untuk fitur login dengan Google."
+ },
+ {
+  "trigger": false,
+  "query": "Commit my changes."
+ },
+ {
+  "trigger": false,
+  "query": "Fix the findings in the QA report."
+ },
+ {
+  "trigger": false,
+  "query": "Write a SQL query that returns the top 10 customers by revenue."
+ },
+ {
+  "trigger": false,
+  "query": "Jelaskan perbedaan antara REST dan GraphQL."
+ }
+]
