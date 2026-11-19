@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- First real run of the whole chain on a Next.js portfolio (2026-11-19: `/smart-plan` with `smart-interview`
+  → `/smart-implement` → `/smart-qa` on a login-form restyle; 4 tasks, scope trace 13 of 13 hunks mapped,
+  QA verdict PASS WITH FOLLOW-UPS with 0 findings). It found four mistakes in the new scripts, all fixed:
+  (1) a ticket that itself ends in `-T<digits>` (the project's `PRTFL-191126-T0856`) was read as ticket
+  plus task, so every task collapsed into one id: `check-plan.py` and `scope-trace.py` now take the whole
+  first token as the id and `check-plan.py` validates it against the header ticket, and the branch regex
+  in `smart-plan` Step 1 keeps such a ticket whole; (2) `scope-trace.py` credited every hunk to the first
+  task naming a file, so with several tasks on one file the others were reported as ticked without a hunk:
+  all tasks naming the file are credited now; (3) a leading dot was stripped from `.agents/...` paths, and a
+  task that names only bookkeeping paths is now a `NOTE` instead of a false check; (4) `check-plan.py`
+  refused any plan with a ticked task, so it failed on an executed plan: the rule now applies to a `DRAFT`
+  only. Each was reproduced first, then re-tested against the earlier cases (`ABC-12`, `none`, split
+  series, dirty pre-run file, binary file, snapshot inside the project). Still not proven: a model other
+  than the one that wrote the scripts, one project only, and a real sign-in with valid credentials.
+
 - Checked on 2026-11-19: `npx skills@latest add <local path> --skill smart-plan --skill smart-interview
   -a claude-code -y` into an empty git project copies the whole skill folder, including `scripts/`
   (4 files `cmp`-identical to this repository, executable bits kept), and both scripts ran from the

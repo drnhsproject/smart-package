@@ -6,7 +6,7 @@
 Checks what a script can prove, so the model does not have to claim it:
   - header: title, Status, Revision, Ticket; Part/Series come as a pair
   - required sections (short plan vs full plan)
-  - tasks: id format, ids unique, ids carry the header's ticket, never pre-checked,
+  - tasks: id format, ids unique, ids carry the header's ticket, not pre-checked while the plan is a DRAFT,
     each has Accept and Verify, BLOCKED_BY exists and points backwards
   - every `file:line` citation: the file exists under --root and the line is in range
   - paths named under "Reused code" exist
@@ -29,7 +29,15 @@ SHORT = ["Context", "Findings", "Tasks", "Verification", "Execution log"]
 FULL = ["Context", "Findings", "Recommended approach", "Key decisions",
         "Affected layers & contract impact", "Tasks", "Reused code", "Rules applied",
         "Risks & trade-offs", "Verification", "Execution log"]
-TASK = re.compile(r"^\s*- \[(?P<box>[ xX])\]\s+(?:(?P<tk>[A-Za-z][A-Za-z0-9]*-\d+)-)?T(?P<n>\d+)\b(?P<rest>.*)$")
+# The id is the whole first token: a ticket such as PRTFL-191126-T0856 itself ends in -T<digits>, so the
+# id cannot be split by a pattern alone. It is validated against the header ticket instead.
+TASK = re.compile(r"^\s*- \[(?P<box>[ xX])\]\s+(?P<id>\S+)(?P<rest>.*)$")
+
+
+def dep_pattern(ticket):
+    if ticket and ticket.lower() != "none":
+        return re.compile(rf"(?:{re.escape(ticket)}-)?T\d+")
+    return re.compile(r"T\d+")
 CITE = re.compile(r"`([A-Za-z0-9_./@\-\[\]()]+\.[A-Za-z0-9]{1,6}):(\d+)(?:-(\d+))?`")
 NOT_FILES = {"com", "io", "dev", "org", "net", "app", "co", "id"}
 FAILS = []
@@ -66,7 +74,7 @@ def parse_tasks(lines):
     for ln in lines:
         m = TASK.match(ln)
         if m:
-            tasks.append({"box": m["box"], "tk": m["tk"], "n": int(m["n"]), "rest": m["rest"], "raw": ln})
+            tasks.append({"box": m["box"], "id": m["id"], "rest": m["rest"], "raw": ln})
     return tasks
 
 
@@ -111,17 +119,16 @@ def check_tasks(secs, h):
     none = ticket.lower() == "none"
     seen = {}
     for t in tasks:
-        tid = f"{t['tk']}-T{t['n']}" if t["tk"] else f"T{t['n']}"
-        t["id"] = tid
+        tid = t["id"]
         if tid in seen:
             fail("tasks", f"duplicate task id {tid}")
         seen[tid] = t
-        if none and t["tk"]:
-            fail("tasks", f"{tid}: header says Ticket: none but the id carries a ticket")
-        if not none and t["tk"] != ticket:
-            fail("tasks", f"{tid}: id should start with the header ticket `{ticket}-`")
-        if t["box"] != " ":
-            fail("tasks", f"{tid}: task is pre-checked in a plan that has not been executed")
+        if none and not re.fullmatch(r"T\d+", tid):
+            fail("tasks", f"{tid}: header says Ticket: none, so the id should be `T<n>`")
+        if not none and not re.fullmatch(rf"{re.escape(ticket)}-T\d+", tid):
+            fail("tasks", f"{tid}: id should be `{ticket}-T<n>` (the header ticket, then -T and a number)")
+        if t["box"] != " " and h.get("Status") == "DRAFT":  # ticks are normal once smart-implement has run
+            fail("tasks", f"{tid}: task is pre-checked in a plan that is still a DRAFT")
         r = t["rest"]
         if "Accept:" not in r:
             fail("tasks", f"{tid}: no `Accept:` criterion")
@@ -134,7 +141,7 @@ def check_tasks(secs, h):
         m = re.search(r"BLOCKED_BY:\s*(.+)$", t["rest"])
         if not m:
             continue
-        for dep in re.findall(r"(?:[A-Za-z][A-Za-z0-9]*-\d+-)?T\d+", m.group(1)):
+        for dep in dep_pattern(ticket).findall(m.group(1)):
             if dep not in seen:
                 if not split:  # in a split plan the dependency may live in an earlier part
                     fail("tasks", f"{t['id']}: BLOCKED_BY {dep} is not a task in this plan")
@@ -185,21 +192,22 @@ def check_series(plan, h, tasks, plans_dir):
         if k in parts:
             fail("series", f"two files claim Part {k}: {parts[k]['file'].name} and {f.name}")
         parts[k] = {"file": f, "tasks": parse_tasks(sections(txt).get("Tasks", []))}
+    dep_re = dep_pattern(h.get("Ticket", "none"))
     if len(parts) < m:
         have = ", ".join(str(k) for k in sorted(parts))
         print(f"NOTE series: {len(parts)} of {m} parts found (have {have}); cross-part checks cover those only")
     ids = {}
     for k in sorted(parts):
         for t in parts[k]["tasks"]:
-            tid = f"{t['tk']}-T{t['n']}" if t["tk"] else f"T{t['n']}"
+            tid = t["id"]
             if tid in ids:
                 fail("series", f"task id {tid} appears in part {ids[tid]} and part {k}")
             ids[tid] = k
     for k in sorted(parts):
         for t in parts[k]["tasks"]:
-            tid = f"{t['tk']}-T{t['n']}" if t["tk"] else f"T{t['n']}"
+            tid = t["id"]
             mm = re.search(r"BLOCKED_BY:\s*(.+)$", t["rest"])
-            for dep in (re.findall(r"(?:[A-Za-z][A-Za-z0-9]*-\d+-)?T\d+", mm.group(1)) if mm else []):
+            for dep in (dep_re.findall(mm.group(1)) if mm else []):
                 if dep not in ids and len(parts) == m:
                     fail("series", f"{tid} (part {k}): BLOCKED_BY {dep} is not a task in any part")
                 if dep in ids and ids[dep] > k:

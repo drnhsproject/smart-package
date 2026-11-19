@@ -97,7 +97,7 @@ when the code is known and the questions can be sharp.
 
 Every plan carries the ticket it belongs to, in the header and in every task id. Take it,
 in this order, from: `--ticket=`, the user's message, the current git branch name
-(`git branch --show-current`, first match of `[A-Za-z][A-Za-z0-9]*-[0-9]+`, uppercased), the
+(`git branch --show-current`, first match of `[A-Za-z][A-Za-z0-9]*-[0-9]+(-[A-Za-z]?[0-9]+)*`, uppercased, so a ticket such as `PRTFL-191126-T0856` is kept whole), the
 newest open plan's `Ticket:`. If none is found, ask once ("Which ticket is this for? Reply
 `none` if there is no ticket"). With no ticket, the header says `Ticket: none` and task ids
 are plain `T<n>`. Never invent a ticket number.

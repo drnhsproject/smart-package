@@ -32,7 +32,8 @@ import sys
 from pathlib import Path
 
 SKIP = (".agents/", ".claude/skills/")
-TASK = re.compile(r"^\s*- \[(?P<box>[ xX])\]\s+(?:(?P<tk>[A-Za-z][A-Za-z0-9]*-\d+)-)?T(?P<n>\d+)\b(?P<rest>.*)$")
+# The id is the whole first token (a ticket may itself end in -T<digits>, e.g. PRTFL-191126-T0856).
+TASK = re.compile(r"^\s*- \[(?P<box>[ xX])\]\s+(?P<id>\S+)(?P<rest>.*)$")
 PATHISH = re.compile(r"`([^`\s]+)`|(?<![\w`/])([\w@\-\[\]()]+(?:/[\w@.\-\[\]()]+)+|[\w@\-\[\]()]+\.[A-Za-z0-9]{1,6})(?![\w`])")
 
 
@@ -120,20 +121,29 @@ def task_files(plan):
         before = m["rest"].split("Accept:")[0]
         toks = set()
         for a, b in PATHISH.findall(before):
-            t = (a or b).strip("`,.;:)")
+            t = (a or b).strip("`,;:()").rstrip(".")  # keep a leading dot: `.agents/...` is a real path
             if "/" in t or re.search(r"\.[A-Za-z0-9]{1,6}$", t):
                 toks.add(t)
-        tid = f"{m['tk']}-T{m['n']}" if m["tk"] else f"T{m['n']}"
+        tid = m["id"]
         tasks.append({"id": tid, "ticked": m["box"] != " ", "files": toks})
     return tasks
 
 
-def owner_of(path, tasks):
+def owners_of(path, tasks):
+    """Every task that names this file. The script maps by file, so when several tasks name the
+    same file it cannot tell which task a hunk belongs to: all of them are credited."""
+    out = []
     for t in tasks:
         for f in t["files"]:
             if path == f or path.endswith("/" + f) or (f.endswith("/") and path.startswith(f)):
-                return t["id"]
-    return None
+                out.append(t["id"])
+                break
+    return out
+
+
+def bookkeeping_only(task):
+    """A task whose files all lie under the bookkeeping prefixes has no hunk by design."""
+    return bool(task["files"]) and all(f.startswith(SKIP) for f in task["files"])
 
 
 def cmd_snapshot(a):
@@ -182,15 +192,16 @@ def cmd_trace(a):
         hs = hunks(base, cur)
         if pre is not None and pre["sha256"] and not hs:
             continue  # pre-run file left exactly as it was found
-        owner = owner_of(path, tasks)
+        owners = owners_of(path, tasks)
         for start, rem, add in hs:
             total += 1
             where = f"{path}:{start}"
             if squash(rem) == squash(add):
                 fmt += 1
-            elif owner:
+            elif owners:
                 mapped += 1
-                touched_by_task.setdefault(owner, []).append(where)
+                for o in owners:
+                    touched_by_task.setdefault(o, []).append(where)
             elif path in allow:
                 mapped += 1
                 allowed.append(where)
@@ -203,7 +214,14 @@ def cmd_trace(a):
               f"pass --allow <path> and log why)")
     for w in allowed:
         print(f"ALLOWED  {w}  (by --allow; the log must say whether it is support or a user decision)")
-    ghosts = [t["id"] for t in tasks if t["ticked"] and t["id"] not in touched_by_task]
+    ghosts = []
+    for t in tasks:
+        if not t["ticked"] or t["id"] in touched_by_task:
+            continue
+        if bookkeeping_only(t):
+            print(f"NOTE {t['id']} names only bookkeeping paths (.agents/ ...): no hunk expected")
+        else:
+            ghosts.append(t["id"])
     for tid in ghosts:
         print(f"TICKED-NO-HUNK {tid}  (false check, unless its Verify only writes the log: untick it and do the task)")
     if not tasks:
