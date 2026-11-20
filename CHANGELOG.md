@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.0 (2026-11-20)
+
 - Tests by default: every `smart-plan` task now carries `Test: <test — what fails on the old code>` or
   `Test: none — <reason>` (docs, config, copy), checked by `check-plan.py` on DRAFT plans only, so plans
   written earlier still print OK. `smart-implement` writes that test first and logs red then green (a
