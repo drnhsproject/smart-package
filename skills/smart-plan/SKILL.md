@@ -213,6 +213,9 @@ Each answer becomes a line under `## Key decisions` (decision → rationale, `us
   each task one acceptance criterion in the project's own domain vocabulary. The plan is the
   ONLY work file: write the tasks as the `## Tasks` checklist itself, detailed enough that
   an implementer executes it without a second document.
+- Every task names its test in `Test:`: the test that fails on the old code and passes on the new
+  (file or name, plus what it proves). A task that changes logic gets a real test; a task that changes
+  only docs, config, or copy writes `Test: none — <reason>`. The implementer writes the test first.
 - Every task must change something. Behaviour that already exists and stays as it is
   belongs in Findings, never in Tasks.
 - Name the concrete files to touch. For a pattern repeated across many files, describe it
@@ -248,6 +251,8 @@ Then fix the plan or label the item `UNVERIFIED` when a check fails:
   `Owner-verify`, never as `Verify`, so the implementer is not left holding a task it cannot finish.
   A task whose only check is an `Owner-verify` still gets a `Verify` that proves what the agent can
   (typecheck, a build, a request without a session).
+- Every task has a `Test:` (a test that fails on the old code, or `none — <reason>`); the script checks
+  the field, you judge whether the named test would really fail on the old code.
 - Split plans only: across all parts, each task appears once, task ids are unique, no
   `BLOCKED_BY` points forward, no two parts decide the same thing differently or apply a rule
   differently, no two parts touch the same lines in conflicting ways, and each part alone leaves
@@ -276,8 +281,8 @@ Follows: <optional prior plan> · Sibling: <optional parallel plan> · Part: <n 
 ## Key decisions    — decision → rationale (one line each)
 ## Affected layers & contract impact — layers touched; API/data contracts, or "none"
 ## Tasks            — `- [ ]` checklist grouped by layer/component (never pre-checked):
-                      `- [ ] <TICKET>-T<n> <what> — <file(s)> · Accept: <criterion> · Verify: <command the agent can run> · Owner-verify: <check only the owner can do> · BLOCKED_BY: <TICKET>-T<m>`
-                      (with `Ticket: none`, ids are plain `T<n>`; `Owner-verify` is optional)
+                      `- [ ] <TICKET>-T<n> <what> — <file(s)> · Accept: <criterion> · Verify: <command the agent can run> · Test: <test file or name — what fails on the old code | none — reason> · Owner-verify: <check only the owner can do> · BLOCKED_BY: <TICKET>-T<m>`
+                      (with `Ticket: none`, ids are plain `T<n>`; `Test:` is required, `Owner-verify` is optional)
 ## Reused code      — existing functions/hooks/utils with paths
 ## Rules applied    — rule file + section
 ## Risks & trade-offs — including the premortem line

@@ -7,7 +7,8 @@ Checks what a script can prove, so the model does not have to claim it:
   - header: title, Status, Revision, Ticket; Part/Series come as a pair
   - required sections (short plan vs full plan)
   - tasks: id format, ids unique, ids carry the header's ticket, not pre-checked while the plan is a DRAFT,
-    each has Accept and Verify, BLOCKED_BY exists and points backwards
+    each has Accept and Verify, BLOCKED_BY exists and points backwards, and (DRAFT plans only) each has
+    `Test: <test>` or `Test: none — <reason>`
   - every `file:line` citation: the file exists under --root and the line is in range
   - paths named under "Reused code" exist
   - the premortem line ("This plan fails if"), full plans only (a short plan has no Risks section)
@@ -149,6 +150,12 @@ def check_tasks(secs, h):
             fail("tasks", f"{tid}: no `Verify:` the agent can run (an Owner-verify alone is not enough)")
         if not re.search(r"`[^`]+`|\b[\w./-]+\.\w{1,6}\b", r.split("Accept:")[0]):
             fail("tasks", f"{tid}: names no file before `Accept:`")
+        if h.get("Status") == "DRAFT":  # plans written before the Test: field are not retro-checked
+            tm = re.search(r"·\s*Test:\s*(\S.*?)(?=\s+·\s|$)", r)
+            if not tm:
+                fail("tasks", f"{tid}: no `Test:` (a test that fails on the old code, or `Test: none — <reason>`)")
+            elif re.match(r"none\b", tm.group(1), re.I) and not re.match(r"none\s+[—–-]+\s*[^\s—–-]", tm.group(1), re.I):
+                fail("tasks", f"{tid}: `Test: none` needs a reason (`Test: none — <reason>`)")
     order = [t["id"] for t in tasks]
     for t in tasks:
         m = re.search(r"BLOCKED_BY:\s*(.+)$", t["rest"])

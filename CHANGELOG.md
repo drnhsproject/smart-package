@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Tests by default: every `smart-plan` task now carries `Test: <test — what fails on the old code>` or
+  `Test: none — <reason>` (docs, config, copy), checked by `check-plan.py` on DRAFT plans only, so plans
+  written earlier still print OK. `smart-implement` writes that test first and logs red then green (a
+  throwaway reproduction script when the project has no test setup; no framework installed), widens the
+  self-check test rule from mappers, parsers, fetchers and hooks to every changed function with logic, and
+  runs a pre-QA probe of the `smart-qa` Step 4 cases before review. `smart-qa` checks that each promised
+  test exists and can fail.
+
 ## 0.4.2 (2026-11-20)
 
 - Security audit (Snyk, 2026-11-18/19): `smart-plan` failed E004 (CRITICAL, "prompt injection in skill

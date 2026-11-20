@@ -157,6 +157,11 @@ For each Accept criterion and each changed behaviour, try to make it fail. Cover
 the change makes them relevant:
 
 - **Accept**: does the criterion hold, run for real, not read off the code?
+- **Test**: for each task whose `Test:` names a test, does that test exist and run? A missing or skipped
+  test is a LOW `bug` finding; a test that passes on the old code too (it proves nothing) is MEDIUM.
+  You never edit product code, so judge "passes on the old code" from the test's assertions, or run the
+  test against the pre-run copies (or a `git worktree` of the base commit) in a temporary directory.
+  `Test: none — <reason>` is fine when the reason holds.
 - **Edge inputs**: empty, null, zero, negative, very large, wrong type, unicode, duplicates,
   boundary values (off by one), and the first / last element.
 - **Error paths**: what happens when a dependency fails, a file is missing, a call times out,

@@ -68,7 +68,7 @@ Flow: Clarify → Explore → Rules → Grill → Design → Self-check → Outp
 - **Adapts to the project.** Step 0 detects rule indexes, change logs, plans
   folders, and the real lint / typecheck / test commands. Nothing is hard-coded.
 - **Executable plan.** Tasks are a checklist with file, acceptance criterion,
-  a `Verify` command the agent can run, an optional `Owner-verify` (a check only you can do: a login,
+  a `Verify` command the agent can run, a `Test:` (the test that fails on the old code, or `none — reason`), an optional `Owner-verify` (a check only you can do: a login,
   a screen, your own data), and dependencies, so an implementer needs no second document.
 - **An interview before the plan (Step 3b).** After exploring, it answers what the code already settles
   and asks you the rest one question at a time, each with a recommended option, challenges answers that
@@ -103,6 +103,11 @@ Flow: Locate → Check → Approve → Execute → Scope trace → Review → Cl
   (a check only you can do) never blocks the tick: it stays `OWNER-VERIFY pending` in the log, is asked
   for together in one message, and is recorded as "reported by the user, not run by the agent", never as
   a check the agent passed.
+- **Test first.** Every plan task names its test (`Test:`, or `Test: none — <reason>` for docs and
+  config). The implementer writes it before the change and shows it failing on the old code, then
+  passing; with no test setup in your project it uses a throwaway reproduction script and installs
+  nothing. Before QA it also tries the same edge cases, error paths and callers that `smart-qa` will, so
+  fewer findings reach QA.
 - **Scope trace.** At the end every changed hunk must trace to a task or a decision of
   yours, and every ticked box must have a hunk. Unmapped changes stop the run.
 - **Independent review** for anything bigger than a small change (more than 2 files, a

@@ -156,7 +156,7 @@ Set `Status: IN PROGRESS` before the first edit. Then, per task, in dependency o
 
 1. Read the files the task names (ranges, not whole large files) and the code to reuse that
    the plan lists. Reuse it; do not write a second version.
-2. Make the smallest change that meets the task's `Accept` criterion. Follow the project's
+2. Write the task's `Test:` first (see **Test first** below), then make the smallest change that meets the task's `Accept` criterion. Follow the project's
    own conventions as written in the plan's Rules applied, or as visible in neighbouring code.
 3. Run the task's `Verify`, and the project's lint / typecheck / test commands when the task
    changed code. Compare with the baseline: a NEW failure is a red gate (Fatal-Stop 3); a
@@ -172,6 +172,19 @@ Set `Status: IN PROGRESS` before the first edit. Then, per task, in dependency o
    OWNER-VERIFY pending — <the check, one line>`.
 6. Anything unplanned that you found (a bug nearby, a missing step, a wrong assumption) goes
    in the log as `Found:` or `Deviation:` with one line. It is not coded.
+
+**Test first.** The task's `Test:` field names the test that proves the change. Write it before the
+change and run it: it must fail on the old code (or fail to find the new behaviour). After the change it
+must pass. Put both results in the task's log line (`test red → green`). A rule for each case:
+- `Test: none — <reason>`: write nothing, log the reason in the task's line.
+- The project has no test setup: write the smallest throwaway reproduction script in the temp directory,
+  run it before and after, keep its output in the log, and install no test framework (that is work the
+  plan did not list). Say in the log that no permanent test was added.
+- An older plan with no `Test:` field: when the task changes logic and the project has a test setup, add a
+  test anyway. It is direct support of that task (like an import), not new work, so it needs no question:
+  say `test added (plan had no Test:)` in the task's log line.
+- A test that cannot fail on the old code (it asserts nothing, or only what was already true) is not a
+  test for this task: rewrite it before ticking.
 
 **Owner-verify.** A check only the owner can do (a login, a screen, a real device, their own data).
 The agent never runs it by guessing a session and never reports it as passed. It stays `pending` in
@@ -230,6 +243,15 @@ and `tsc --noEmit` whenever a `tsconfig.json` exists, even if the project has no
 compared with the baseline. Report real results; a command that could not run is reported as
 not run, with why. A failing result is Fatal-Stop 3.
 
+**Pre-QA probe.** `smart-qa` will try to break this change; try first, so it finds less. For each
+changed behaviour, try the cases of `smart-qa` Step 4 that apply: edge inputs (empty, null, zero, wrong
+type, boundary values), error paths (a failing dependency, a missing file, malformed input), repeated or
+concurrent calls and retry after a partial failure, and the callers of every changed function
+(`grep` them). Run each case for real. A failing case inside the plan's scope is fixed now; outside it,
+it is a `Found:` line. A case worth keeping becomes a test next to the project's existing tests (a
+throwaway script when the project has no test setup). Log one line:
+`probe · <n> cases · <n> fixed · <n> tests added · <n> found (reported)`.
+
 **Self-check before review.** These are the defects that reviews of finished work find again
 and again; clearing them yourself saves a review round. Look only at the items the diff
 touches, write `n/a` for the rest, and fix a hit only inside the plan's scope (otherwise it is
@@ -237,7 +259,8 @@ a `Found:` line):
 
 1. Text that came from outside (an API, a database, user input) and now lands in markup, an
    HTML string, a tooltip, or a map popup is escaped first.
-2. Every changed mapper, parser, fetcher, or hook has a test that would fail on the old code.
+2. Every changed function with logic (a mapper, parser, fetcher, hook, rule, or handler) has a test that would fail on
+   the old code, unless its task says `Test: none — <reason>`.
 3. Colors, sizes, and spacing come from the project's tokens or constants, not new literals.
 4. A busy indicator follows the real in-flight state, including the case where stale data is
    shown while fresh data loads.
