@@ -13,6 +13,8 @@ Usage:
 Triggers file: [{"query": "...", "trigger": true|false}, ...]
 Needs the `claude` CLI, logged in. Each run is a real, billed agent session.
 """
+from __future__ import annotations
+
 import argparse
 import json
 import shutil
@@ -34,7 +36,11 @@ def find_skill_dir(repo: Path, name: str | None = None) -> Path:
     if len(hits) != 1:
         sys.exit(f"expected exactly one matching skills/*/SKILL.md under {repo}, found {len(hits)}"
                  + ("" if name else " (several skills here: pass --skill <name>)"))
-    return hits[0].parent
+    skill_dir = hits[0].parent.resolve()
+    if not skill_dir.is_relative_to(repo.resolve()):
+        sys.exit(f"ERROR [run-triggers.py]: {skill_dir} is outside the repository {repo}\n"
+                 "NEXT: use a skills/<name> folder that lives inside the repository, not a symlink to elsewhere.")
+    return skill_dir
 
 
 def run_once(skill_dir: Path, query: str, model: str | None) -> tuple[bool, str]:
@@ -89,6 +95,9 @@ def main() -> None:
     args = ap.parse_args()
 
     triggers_path = Path(args.triggers).resolve()
+    if not triggers_path.is_file() or triggers_path.suffix.lower() != ".json":
+        sys.exit(f"ERROR [run-triggers.py]: {triggers_path} is not a .json file\n"
+                 "NEXT: pass the path of a triggers file such as evals/triggers-smart-fix.json.")
     repo = triggers_path.parent.parent
     skill_dir = find_skill_dir(repo, args.skill)
     cases = json.loads(triggers_path.read_text())

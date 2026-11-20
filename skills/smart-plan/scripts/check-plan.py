@@ -78,6 +78,14 @@ def parse_tasks(lines):
     return tasks
 
 
+def inside(root, rel):
+    """True when `rel` (text taken from a plan) stays under `root` after resolving `..` and symlinks."""
+    try:
+        return (root / rel).resolve().is_relative_to(root.resolve())
+    except (OSError, ValueError):
+        return False
+
+
 def check_citations(text, root, only_lines=None):
     cache = {}
     for i, line in enumerate(text.splitlines(), 1):
@@ -86,6 +94,9 @@ def check_citations(text, root, only_lines=None):
         for m in CITE.finditer(line):
             path, a, b = m.group(1), int(m.group(2)), m.group(3)
             if path.rsplit(".", 1)[-1].lower() in NOT_FILES:
+                continue
+            if not inside(root, path):
+                fail("citation", f"plan line {i}: `{path}` escapes the project root {root}")
                 continue
             p = (root / path)
             if not p.is_file():
@@ -105,7 +116,9 @@ def check_reused(secs, root):
             continue
         for tok in re.findall(r"`([^`\s]+)`", ln):
             if "/" in tok and "." in tok.rsplit("/", 1)[-1] and not tok.startswith("http") and ":" not in tok:
-                if not (root / tok).exists():
+                if not inside(root, tok):
+                    fail("reused-code", f"`{tok}` escapes the project root {root}")
+                elif not (root / tok).exists():
                     fail("reused-code", f"`{tok}` does not exist under {root}")
 
 
@@ -159,7 +172,10 @@ def siblings(plan, series, plans_dir):
                 break
         base = base or plan.parent
     out = []
+    base_real = base.resolve()
     for f in sorted(base.rglob("*.md")):
+        if not f.resolve().is_relative_to(base_real):
+            continue  # a symlink that leads outside the plans folder is not read
         try:
             head = "\n".join(f.read_text(errors="ignore").splitlines()[:12])
         except OSError:
@@ -222,13 +238,13 @@ def main():
     ap.add_argument("--root", default=".", help="project root that cited paths are relative to (default: .)")
     ap.add_argument("--plans-dir", help="folder to search for the other parts of a split plan")
     a = ap.parse_args()
-    plan = Path(a.plan)
-    if not plan.is_file():
-        print(f"ERROR [check-plan.py]: {plan} is not a file", file=sys.stderr)
+    plan = Path(a.plan).resolve()
+    if not plan.is_file() or plan.suffix.lower() != ".md":
+        print(f"ERROR [check-plan.py]: {plan} is not a Markdown (.md) file", file=sys.stderr)
         print("NEXT: pass the path of the saved plan Markdown file (check it with `ls`), then run again.",
               file=sys.stderr)
         sys.exit(2)
-    root = Path(a.root)
+    root = Path(a.root).resolve()
     text = plan.read_text(errors="ignore")
     h = header(text)
     if not re.search(r"^# (Plan|Analysis):\s*\S", text, re.M):

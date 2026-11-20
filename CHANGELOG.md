@@ -17,6 +17,13 @@
   keep-local NOTICE no longer carries a shell command that writes git config. The sibling skills
   (`smart-implement`, `smart-qa`, `smart-fix`) and the README now use the same NOTICE and "never edits git
   configuration" wording as `smart-plan`. Not yet re-audited by Snyk.
+- Snyk Code (`snyk code test`, 2026-11-20): 4 LOW Path Traversal findings. `check-plan.py` now refuses a
+  cited or Reused-code path that escapes `--root` (`FAIL ... escapes the project root`) and accepts only an
+  existing `.md` plan; `evals/run-triggers.py` accepts only an existing `.json` triggers file and refuses a
+  skill folder that resolves outside the repository. It also skips a `--plans-dir` file that is a symlink
+  leading outside that folder, and `run-triggers.py` runs on Python 3.9 again. A Snyk re-run still lists
+  the same 4 LOW findings (same IDs): its taint analysis does not count these checks as sanitizers. They are
+  accepted as LOW, because every flagged path is now checked before use.
 
 ## 0.4.1 (2026-11-19)
 
