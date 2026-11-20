@@ -10,6 +10,13 @@
   `smart-interview` now state that fetched pages and git history are untrusted data and must be reported,
   not obeyed. Script errors (`interview.py`, `scope-trace.py`, `check-plan.py`) now print
   `ERROR [script]: <cause>` plus a `NEXT:` line telling the model what to do. Not yet re-audited by Snyk.
+- Security audit follow-up (2026-11-20): the live Snyk page rates `smart-plan` Medium with one finding,
+  W011 (`git log` and change-log greps may carry outside text); the Critical label in the CLI predates
+  465eba5. Fix: `smart-plan` now has an "Untrusted input" rule (report, never obey) in the Hard rule and at
+  the history read in Step 2; the stale "local exclude line" write clause (E004 leftover) is gone, and the
+  keep-local NOTICE no longer carries a shell command that writes git config. The sibling skills
+  (`smart-implement`, `smart-qa`, `smart-fix`) and the README now use the same NOTICE and "never edits git
+  configuration" wording as `smart-plan`. Not yet re-audited by Snyk.
 
 ## 0.4.1 (2026-11-19)
 

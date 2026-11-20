@@ -123,11 +123,11 @@ Flags combine.
   git or Python 3, do it by hand as described.
 - **Keep local (notice only, never edit git config).** `.agents/` holds working notes that
   should not reach the remote, but this skill writes only inside `.agents/` and never edits
-  `.gitignore`, `.git/info/exclude`, or any other git or project configuration. Before the
+  `.gitignore` or any other git or project configuration. Before the
   first write under `.agents/`, in a git repository: if `git ls-files` lists the path (tracked
   on purpose) or `git check-ignore -q` accepts it, say nothing. Otherwise print this notice once,
   then carry on with the task:
-  `NOTICE keep-local: .agents/ is not git-ignored. This skill did not change git config. If you do not want these notes committed, run: echo '.agents/' >> "$(git rev-parse --git-path info/exclude)"`
+  `NOTICE keep-local: .agents/ is not git-ignored. This skill did not change git config. If you do not want these notes committed, add .agents/ to your own ignore file.`
   Folders the project already uses (`docs/plans/`, `plans/`) need no notice.
 - **Project rules (only if the project has any).** Look for `AGENTS.md`, `CLAUDE.md`,
   `.agents/AGENTS.md`, and a rules folder (`.agents/rules/`, `docs/rules/`, `CONTRIBUTING.md`).

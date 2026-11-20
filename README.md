@@ -234,8 +234,7 @@ its checks twice, switch up a tier instead of retrying. Switch models between st
 
 Plans, analyses, and review reports under `.agents/` are working notes. The skills never edit
 your git configuration. On first write, if `.agents/` is neither tracked nor ignored, they
-print one `NOTICE keep-local` line with the exact command to run yourself
-(`echo '.agents/' >> "$(git rev-parse --git-path info/exclude)"`), so nothing reaches the remote
+print one `NOTICE keep-local` line telling you to add `.agents/` to your own ignore file, so nothing reaches the remote
 unless you choose otherwise. `smart-implement` never stages `.agents/` or uses `git add -A`.
 
 ## Install

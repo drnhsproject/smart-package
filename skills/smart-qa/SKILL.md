@@ -241,8 +241,8 @@ if they choose to; log it as `findings not independently checked`. Never fall ba
 Save to `.agents/qa/YYYY/MM/DD/YYYY-MM-DD-<TICKET|slug>-qa.md` (or an existing `docs/qa/`).
 Before the first write under `.agents/`, in a git repository, check `git ls-files` and
 `git check-ignore -q`. If `.agents/` is neither tracked nor ignored, print once, and continue:
-`NOTICE keep-local: .agents/ is not git-ignored. This skill did not change git config. If you do not want these notes committed, run: echo '.agents/' >> "$(git rev-parse --git-path info/exclude)"`
-Never edit `.gitignore`, `.git/info/exclude`, or any other git configuration.
+`NOTICE keep-local: .agents/ is not git-ignored. This skill did not change git config. If you do not want these notes committed, add .agents/ to your own ignore file.`
+Never edit `.gitignore` or any other git configuration.
 
 ```markdown
 # QA: <TICKET> <plan title>
