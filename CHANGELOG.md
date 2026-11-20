@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.4.2 (2026-11-20)
+
 - Security audit (Snyk, 2026-11-18/19): `smart-plan` failed E004 (CRITICAL, "prompt injection in skill
   instructions": a read-only planning skill appended to `.git/info/exclude`); `smart-qa` and
   `smart-interview` warned W011 (third-party content: `--live` pages, git history). Fix: no skill edits
