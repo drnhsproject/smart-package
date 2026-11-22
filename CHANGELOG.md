@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.6.0 (2026-11-22)
+
 - `smart-fix` as rigorous as `smart-implement`: pre-flight before the first edit (rules, baseline, snapshot);
   the regression test is written first (red, then green); security fixes close the flaw at its entry or
   sink and are tested with an attack and a legitimate input; performance fixes carry a before and after
