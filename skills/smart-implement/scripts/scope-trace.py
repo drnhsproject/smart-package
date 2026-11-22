@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Scope trace for smart-implement. Standard library plus the `git` command.
+"""Scope trace for smart-implement and smart-fix. Standard library plus the `git` command.
+The copy in smart-fix/scripts/ must stay byte-identical to this one (`cmp` them after any edit).
+PLAN may be any file of `- [x] <id> <files>` lines: smart-fix passes a temporary findings list.
 
   scope-trace.py snapshot --root DIR --out DIR
       Before the first edit: record the files that are already modified or untracked, and

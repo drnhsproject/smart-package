@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- `smart-fix` as rigorous as `smart-implement`: pre-flight before the first edit (rules, baseline, snapshot);
+  the regression test is written first (red, then green); security fixes close the flaw at its entry or
+  sink and are tested with an attack and a legitimate input; performance fixes carry a before and after
+  number; the same flaw on the finding's own function, handler family or sink is fixed with it. After the
+  last finding: scripted scope trace over a findings list, full checks against the baseline, a probe of the
+  `smart-qa` cases, a self-check, and an independent review (new `--skip-review`, `--reviewer-model`) when
+  a CRITICAL or HIGH finding was handled or more than 2 files changed, with one fix round. New
+  `smart-fix/scripts/scope-trace.py`, an identical copy of the `smart-implement` one: change both together.
+
 ## 0.5.0 (2026-11-20)
 
 - Tests by default: every `smart-plan` task now carries `Test: <test — what fails on the old code>` or

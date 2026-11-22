@@ -161,17 +161,28 @@ Flow: Locate → Scope → Baseline → Test → Security → Regression → Liv
 /smart-fix                              the QA report just written
 /smart-fix <report> --id=QA-3,QA-5      only those findings
 /smart-fix <report> --all               MEDIUM and LOW too
+/smart-fix <report> --skip-review       skip the independent review of the fix
+/smart-fix <report> --reviewer-model=<tier>   model for that reviewer: opus | sonnet | haiku | fable
 ```
 
-Flow: Locate → Confirm → Fix → Prove → Record → Stop.
+Flow: Locate → Pre-flight → Confirm → Fix → Prove → Review → Record → Stop.
 
 - **Re-proves each finding first.** If it cannot be reproduced, nothing is edited and the
   finding is recorded `DISPUTED` with evidence. A fix for a non-bug is a new bug.
 - **Smallest root-cause change, one finding at a time**, most severe first. A fix that grows
   past 3 files, or needs a schema change or a decision from you, is `DEFERRED` and sent to
   `smart-plan`.
-- **A regression test per fix** that fails before and passes after, plus the project's lint,
-  typecheck and the tests of everything touched.
+- **Pre-flight like `smart-implement`:** project rules, a baseline of lint, typecheck and tests, and a
+  snapshot of the files already changed, all before the first edit.
+- **A regression test per fix, written first**: it fails on the old code and passes on the new. Security
+  fixes are tested with the attack payload and a legitimate input; performance fixes carry a number
+  measured before and after. The same flaw on the finding's own function, handler family or sink is fixed
+  with it; elsewhere it is only reported.
+- **After the last fix:** a scripted scope trace (every changed hunk traces to a finding), the full
+  checks against the baseline, a probe of the cases `smart-qa` will try, and a self-check for bugs,
+  security and performance.
+- **Independent review** by a subagent when a CRITICAL or HIGH finding was handled or more than 2 files
+  changed; one fix round, never a silent fallback.
 - **Never grades its own work.** It records the outcome in the same QA report; only a new
   `/smart-qa` run can turn the verdict. Nothing is committed or pushed.
 
@@ -220,7 +231,7 @@ the Claude 5 family as of this writing.
 | `/smart-implement` | Mid (e.g. Sonnet 5.5) | A good plan leaves little to decide. Use the strongest tier if the plan is thin or the change is risky. |
 | Review subagent (inside `smart-implement`) | Strongest, ideally not the model that wrote the code | A reviewer from the same model tends to share the author's blind spots. |
 | `/smart-qa` | Strongest | Finding bugs and security gaps takes reasoning; a missed one is never reported. |
-| `/smart-fix` | Mid | One small finding at a time, each proved by a regression test. Strongest for security findings. |
+| `/smart-fix` | Mid | One small finding at a time, each proved by a regression test. Strongest for security findings. The Step 4b reviewer follows the `smart-implement` reviewer advice. |
 
 Two things the skills can and cannot do about models. They run on whatever model your session
 uses and cannot switch it: change it with `/model` between steps. The one thing they control
@@ -262,7 +273,7 @@ npx skills add drnhsproject/smart-package --skill smart-plan --skill smart-imple
 ```
 
 `smart-interview` is optional: add `--skill smart-interview` to the command, or copy `skills/smart-interview` the same way.
-Three skills carry a helper script (`smart-plan/scripts/check-plan.py`, `smart-implement/scripts/scope-trace.py`, `smart-interview/scripts/interview.py`); they need Python 3 (and `git` for the scope trace), and each skill falls back to doing the same by hand without it. When copying by hand, copy the whole folder, not only `SKILL.md`.
+Four skills carry a helper script (`smart-plan/scripts/check-plan.py`, `smart-implement/scripts/scope-trace.py`, `smart-fix/scripts/scope-trace.py` (an identical copy, so `smart-fix` works installed alone), `smart-interview/scripts/interview.py`); they need Python 3 (and `git` for the scope trace), and each skill falls back to doing the same by hand without it. When copying by hand, copy the whole folder, not only `SKILL.md`.
 
 Checked on 2026-11-16, with all four skills in the repository: `--list` found `smart-plan`,
 `smart-implement`, `smart-qa` and `smart-fix`, and `--skill <name> ... -a claude-code -y` into an empty
