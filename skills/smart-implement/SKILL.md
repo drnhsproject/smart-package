@@ -25,6 +25,17 @@ you resume from the plan file when the user says "continue".
 - **Summaries carry only what matters**: the result, the top risk or problem, and the next
   step. Complete short sentences; do not clip words into telegraph style, and do not repeat what
   the saved file already says.
+<!-- reply-style:start -->
+- Lead with the answer or result, then the reason, then the next step.
+- No greeting, no announcing what you are about to do, no recap, no closing offer of help. A step of this skill that asks for a recap or a restatement still applies.
+- Write complete sentences of at most 20 words, one idea each. Plain wording beats a short fragment.
+- Never shorten a negation (not, never, no, only, except), a number, or a unit.
+- Quote code, commands, paths and error text exactly.
+- Between tool calls say nothing, except one line per phase and one line with the result.
+- Use full, careful wording for security warnings, irreversible or data-destroying actions, steps whose order matters, and any question or option list for the user, within this skill's own length limits for options.
+- Text saved to a file (plans, reports, commits, docs) follows this skill's own file rules, not this block.
+- Before sending, delete a first sentence that announces and a last sentence that recaps.
+<!-- reply-style:end -->
 
 ## Hard rules
 
@@ -156,7 +167,7 @@ Set `Status: IN PROGRESS` before the first edit. Then, per task, in dependency o
 
 1. Read the files the task names (ranges, not whole large files) and the code to reuse that
    the plan lists. Reuse it; do not write a second version.
-2. Write the task's `Test:` first (see **Test first** below), then make the smallest change that meets the task's `Accept` criterion. Follow the project's
+2. Write the task's `Test:` first (see **Test first** below), then make the smallest change that meets the task's `Accept` criterion, written as **Writing the code** below describes. Follow the project's
    own conventions as written in the plan's Rules applied, or as visible in neighbouring code.
 3. Run the task's `Verify`, and the project's lint / typecheck / test commands when the task
    changed code. Compare with the baseline: a NEW failure is a red gate (Fatal-Stop 3); a
@@ -172,6 +183,27 @@ Set `Status: IN PROGRESS` before the first edit. Then, per task, in dependency o
    OWNER-VERIFY pending — <the check, one line>`.
 6. Anything unplanned that you found (a bug nearby, a missing step, a wrong assumption) goes
    in the log as `Found:` or `Deviation:` with one line. It is not coded.
+
+<!-- code-craft:start -->
+**Writing the code.** Write it as a senior programmer would: the least code that fully does the task,
+including every part the task needs. Project rules and neighbouring code win over taste.
+- Ask first whether the task needs it. Work the plan did not ask for is not written (Hard rules).
+- Reach for what exists, in this order: code already in the project, the language's standard library or a
+  platform feature, a dependency the project already has. A new dependency only when the plan names it.
+- No abstraction, wrapper, option or config that is used once or "for later". Delete before you add, and
+  remove code your change leaves dead.
+- Fix a bug at its root, once, in the shared code. Before you edit a function, `grep` its callers; the
+  callers, tests, fixtures and exports your change breaks are part of the task.
+- Code you move or merge keeps its error handling and validation.
+- Never trim validation at a trust boundary, error handling that prevents data loss, security, or
+  accessibility to make a diff shorter.
+- Flat beats nested: early returns and lookup tables over deep `if`/`else` chains. Names say the business
+  meaning. The same logic twice: reuse the first copy.
+- A function or file that your edit makes hard to read in one pass is split inside the task if the task
+  touches it; otherwise it is a `Found:` line, not a drive-by refactor.
+- Comment only the why the code cannot show, in one line. A shortcut with a known limit gets a comment:
+  `shortcut: <the limit>, <when to upgrade>`. Name what you chose not to build as a `Found:` line.
+<!-- code-craft:end -->
 
 **Test first.** The task's `Test:` field names the test that proves the change. Write it before the
 change and run it: it must fail on the old code (or fail to find the new behaviour). After the change it
@@ -269,6 +301,8 @@ a `Found:` line):
    element instead of falling to the page.
 7. Comments, docs, and user-facing text that describe the changed code are changed in the same
    task, not left stating the old behaviour.
+8. Leftover bulk: an abstraction used once, an unused import or helper, a dependency added for a few lines,
+   or a duplicated block that could reuse code the project already has.
 
 Log one line: `self-check · <n> hit and fixed · <n> found (reported) · <n> n/a`.
 

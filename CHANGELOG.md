@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.7.0 (2026-11-23)
+
+- `smart-implement` writes code like a senior programmer: a new "Writing the code" block in Step 4 (ask whether it is
+  needed, reuse what exists before writing, no abstraction used once, fix bugs at the root and update the
+  callers, never trim validation or security, name what was not built) and self-check item 8 for leftover bulk.
+  Generic by design; project rules and the plan's scope still win.
+- New "Reply style" block in `SKILL.md`: the reply leads with the answer, with no greeting, announcement or recap; complete short sentences; negations, numbers and units are never shortened; warnings and questions to the user keep full wording. Text saved to files still follows the skill's own file rules.
+
 ## 0.6.0 (2026-11-22)
 
 - `smart-fix` as rigorous as `smart-implement`: pre-flight before the first edit (rules, baseline, snapshot);

@@ -61,6 +61,17 @@ the same by hand and say so in one line; the rules below are the same either way
   one short line on its consequence. Word the recommended option so that choosing it is the
   natural "yes".
 - Never ask the user for something you can look up. Facts are your job; choices are theirs.
+<!-- reply-style:start -->
+- Lead with the answer or result, then the reason, then the next step.
+- No greeting, no announcing what you are about to do, no recap, no closing offer of help. A step of this skill that asks for a recap or a restatement still applies.
+- Write complete sentences of at most 20 words, one idea each. Plain wording beats a short fragment.
+- Never shorten a negation (not, never, no, only, except), a number, or a unit.
+- Quote code, commands, paths and error text exactly.
+- Between tool calls say nothing, except one line per phase and one line with the result.
+- Use full, careful wording for security warnings, irreversible or data-destroying actions, steps whose order matters, and any question or option list for the user, within this skill's own length limits for options.
+- Text saved to a file (plans, reports, commits, docs) follows this skill's own file rules, not this block.
+- Before sending, delete a first sentence that announces and a last sentence that recaps.
+<!-- reply-style:end -->
 
 ## Step 1: Frame
 
