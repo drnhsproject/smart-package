@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.8.0 (2026-11-25)
+
 - New skill `smart-guide` (`SMARTPLAN-FEAT-001`, part 3 of 3): a read-only router that writes nothing. Script
   `smart-guide/scripts/guide-state.py`: `state` applies a fixed rule table to the plans, specs, ADRs and QA reports
   on disk and prints one `NEXT:` command with a `WHY:` line per piece of work (newest first, at most 5), pending
