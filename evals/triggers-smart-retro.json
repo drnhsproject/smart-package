@@ -1,0 +1,66 @@
+[
+ {
+  "trigger": true,
+  "query": "/smart-retro"
+ },
+ {
+  "trigger": true,
+  "query": "Wrap up this work and record the root cause of the bug we just fixed."
+ },
+ {
+  "trigger": true,
+  "query": "Save a handoff so I can continue this tomorrow."
+ },
+ {
+  "trigger": true,
+  "query": "Catat akar masalah perbaikan tadi di CHANGELOG_FIXES."
+ },
+ {
+  "trigger": true,
+  "query": "Simpan serah terima pekerjaan ini untuk sesi berikutnya."
+ },
+ {
+  "trigger": true,
+  "query": "Do a retro on what we did this week and keep the lesson."
+ },
+ {
+  "trigger": true,
+  "query": "/smart-retro payment-timeout --since=3d"
+ },
+ {
+  "trigger": true,
+  "query": "We stop here for today; write down where we are so the next session can pick up."
+ },
+ {
+  "trigger": false,
+  "query": "Fix the null pointer in the invoice export."
+ },
+ {
+  "trigger": false,
+  "query": "Make a plan for adding dark mode."
+ },
+ {
+  "trigger": false,
+  "query": "What does the retry helper in this repo do?"
+ },
+ {
+  "trigger": false,
+  "query": "Run QA on the plan we just implemented."
+ },
+ {
+  "trigger": false,
+  "query": "Write a spec for the invite flow."
+ },
+ {
+  "trigger": false,
+  "query": "Research which PDF library has the best table support."
+ },
+ {
+  "trigger": false,
+  "query": "Commit my changes."
+ },
+ {
+  "trigger": false,
+  "query": "Buatkan fungsi untuk menghitung diskon."
+ }
+]

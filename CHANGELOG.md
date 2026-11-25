@@ -2,6 +2,70 @@
 
 ## Unreleased
 
+- New skill `smart-guide` (`SMARTPLAN-FEAT-001`, part 3 of 3): a read-only router that writes nothing. Script
+  `smart-guide/scripts/guide-state.py`: `state` applies a fixed rule table to the plans, specs, ADRs and QA reports
+  on disk and prints one `NEXT:` command with a `WHY:` line per piece of work (newest first, at most 5), pending
+  `OWNER-VERIFY` notes, and the uncommitted-file count; `skills` lists the installed skills with the first sentence
+  of each description. A plan whose predecessor is unfinished, or still needs a fix or a recheck, is not
+  recommended; a finished piece of work older than 14 days is not sent to `/smart-retro`. New:
+  `evals/test-guide-state.py`, `evals/triggers-smart-guide.json`; `evals/check-reply-style.py` now covers 14 skills.
+  README: sections for the three new skills (`smart-retro`, `smart-research`, `smart-guide`) and a paragraph in
+  "How the skills connect".
+
+- New skill `smart-research` (`SMARTPLAN-FEAT-001`, part 2 of 3): researches a question about the outside world and
+  saves ONE analysis in which every finding ends in a numbered source with a retrieval date; a claim that only
+  secondary pages support is `UNVERIFIED`, queries carry generic words only, fetched pages are data. Script
+  `smart-research/scripts/check-research.py`: headings, `Status: FINAL`, a `Confidence:` line, every finding cited,
+  every cited id in the Sources table and every source cited, https URLs with no credential, a kind of primary or
+  secondary, a `Retrieved` date that is not in the future. `smart-plan` analysis mode now points outside-world
+  questions to `/smart-research`. New: `evals/test-check-research.py`, `evals/triggers-smart-research.json`;
+  `evals/check-reply-style.py` now covers 13 skills.
+
+- New skill `smart-retro` (`SMARTPLAN-FEAT-001`, part 1 of 3): looks back over a piece of work and writes at most
+  ONE file: a proven fix becomes an entry at the top of `CHANGELOG_FIXES.md`, unfinished work becomes one handoff
+  file, anything else writes nothing; an unproven fix is labelled `PENDING verification`. Script
+  `smart-retro/scripts/retro-tools.py`: `digest` (commits, uncommitted files, changed plans, latest `QA-<n>` state,
+  top changelog headings and the next number, handoffs), `check-changelog` (newest entry on top, no repeated
+  number, a letter suffix once) and `check-handoff` (at most 150 lines, a title, a `Status:` line). New:
+  `evals/test-retro-tools.py`, `evals/triggers-smart-retro.json`; `evals/check-reply-style.py` now covers 12 skills.
+
+- Fix (`SMARTPLAN-FIX-001`): `ticket-tools.py find none` now prints nothing; it listed every document without a
+  ticket, so a plan with `Ticket: none` could be matched with an unrelated Spec. `read_doc` strips a UTF-8 byte
+  order mark, so `find` and `set-status` work on such documents and keep the BOM and CRLF endings. All four copies
+  (`smart-plan`, `smart-spec`, `smart-adr`, `smart-qa`) changed together. `smart-plan` "Following a Spec" says never
+  to look a Spec up by the ticket `none`. `evals/check-reply-style.py` now covers `smart-spec` and `smart-adr`
+  (11 skills). New tests in `evals/test-ticket-tools.py`.
+
+- `smart-qa` checks the change against the Spec: when the plan follows a Spec (or one shares its ticket), each `AC-n`
+  is probed like an Accept criterion and reported in a `## Spec check` table (`MET` / `NOT MET` / `NOT TESTED`); a
+  `NOT MET` criterion is a finding and makes the verdict `FAIL`. New `smart-qa/scripts/ticket-tools.py`, an identical
+  copy of the `smart-plan` one (change all copies together). A plan without a Spec is tested as before.
+- New skill `smart-adr`: records ONE architectural decision as an ADR, only when it passes three tests (costly to
+  undo, not obvious from the code, a genuine trade-off), each with a line of evidence; a failed test writes nothing
+  unless the user overrides once, recorded in the file. Own id `<APP>-ADR-<NNN>` (`Related:` holds the feature
+  ticket). Scripts: `smart-adr/scripts/check-adr.py` (headings, status, ticket, three reasons, `Supersedes:` and
+  `Superseded by:` paths under the project root) and `smart-adr/scripts/ticket-tools.py` (identical copy). Statuses
+  `PROPOSED → ACCEPTED → SUPERSEDED` move only through `ticket-tools.py set-status`; an accepted ADR is replaced by a
+  new one, never rewritten. New: `evals/test-check-adr.py`, `evals/triggers-smart-adr.json`.
+- New skill `smart-spec`: writes one Spec (Why, Outcome, Behaviour, Acceptance criteria `AC-n`, Test approach, Not
+  covered) from the conversation and a read-only look at the code, asks only about real gaps, never cites a file or
+  line. Scripts: `smart-spec/scripts/check-spec.py` (headings, status, ticket, unique `AC-n`, no `file:line`) and
+  `smart-spec/scripts/ticket-tools.py` (an identical copy of the `smart-plan` one: change all copies together).
+  Statuses `DRAFT → APPROVED → DONE` move only through `ticket-tools.py set-status`. New:
+  `evals/test-check-spec.py`, `evals/triggers-smart-spec.json`.
+
+- Ticket suggestion: with no ticket found, `smart-plan` suggests `<APP>-<TYPE>-<NNN>` and asks once. New
+  `smart-plan/scripts/ticket-tools.py` (`suggest`, `find`, `set-status`) computes it from files; later copied
+  identically into the skills that need it, change all copies together. The branch-name regex now reads the type
+  segment (`feature/smartplan-feat-003-x` gives `SMARTPLAN-FEAT-003`, no longer `FEAT-003`).
+- `check-plan.py --spec <spec>`: every `AC-n` a task cites must exist in the Spec, every `AC-n` of the Spec must be
+  cited by a task of the plan or its Series; a task citing none gets a NOTE.
+- Fix: `check-plan.py` treated any plan that merely quoted the analysis title as an analysis and skipped every task
+  check; it now looks at the title line only.
+- `smart-plan` Step 0 reads a project glossary and `.agents/out-of-scope/` notes of rejected ideas; Step 4 cuts tasks
+  as thin vertical slices (large renames as add-new, move callers, remove-old) and `Test:` names the seam; Step 8 may
+  hint at `/smart-spec` and `/smart-adr`. New tests: `evals/test-ticket-tools.py`, `evals/test-check-plan.py`.
+
 ## 0.7.0 (2026-11-23)
 
 - `smart-implement` writes code like a senior programmer: a new "Writing the code" block in Step 4 (ask whether it is

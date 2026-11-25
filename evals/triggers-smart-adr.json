@@ -1,0 +1,66 @@
+[
+ {
+  "trigger": true,
+  "query": "/smart-adr use Postgres instead of MongoDB for orders"
+ },
+ {
+  "trigger": true,
+  "query": "Record this decision as an ADR: we keep plans as files in the repo."
+ },
+ {
+  "trigger": true,
+  "query": "Catat keputusan arsitektur: kita memakai antrean pesan, bukan panggilan HTTP langsung."
+ },
+ {
+  "trigger": true,
+  "query": "Tulis ADR untuk keputusan memisahkan layanan pembayaran."
+ },
+ {
+  "trigger": true,
+  "query": "We decided to go with a monorepo. Please write an ADR for it."
+ },
+ {
+  "trigger": true,
+  "query": "Dokumentasikan keputusan ini: autentikasi memakai token sesi, bukan JWT."
+ },
+ {
+  "trigger": true,
+  "query": "/smart-adr"
+ },
+ {
+  "trigger": true,
+  "query": "Write down why we chose event sourcing, as an architecture decision record."
+ },
+ {
+  "trigger": false,
+  "query": "/smart-spec write a spec for the export feature"
+ },
+ {
+  "trigger": false,
+  "query": "Make an implementation plan for the invite flow."
+ },
+ {
+  "trigger": false,
+  "query": "Write a spec with acceptance criteria for password reset."
+ },
+ {
+  "trigger": false,
+  "query": "/smart-implement .agents/plans/2026/11/25/plan.md"
+ },
+ {
+  "trigger": false,
+  "query": "Rename the config key timeout to timeoutMs, it is a tiny change."
+ },
+ {
+  "trigger": false,
+  "query": "Run QA on the plan we just built."
+ },
+ {
+  "trigger": false,
+  "query": "Fix the findings in the QA report."
+ },
+ {
+  "trigger": false,
+  "query": "Which button color should we use on the settings page? Just pick one."
+ }
+]

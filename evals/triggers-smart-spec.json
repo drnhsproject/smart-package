@@ -1,0 +1,66 @@
+[
+ {
+  "trigger": true,
+  "query": "/smart-spec add CSV export to the report page"
+ },
+ {
+  "trigger": true,
+  "query": "Write a spec for the new invite flow."
+ },
+ {
+  "trigger": true,
+  "query": "Buatkan spec untuk fitur reset password."
+ },
+ {
+  "trigger": true,
+  "query": "Tulis spesifikasi untuk halaman laporan bulanan, lengkap dengan kriteria penerimaan."
+ },
+ {
+  "trigger": true,
+  "query": "Can you specify what the notification settings screen must do? I want acceptance criteria, no implementation details."
+ },
+ {
+  "trigger": true,
+  "query": "Before we plan this, write down the spec: what it must do and how we will know it is done."
+ },
+ {
+  "trigger": true,
+  "query": "/smart-spec"
+ },
+ {
+  "trigger": true,
+  "query": "Turn our discussion about rate limiting into a spec with numbered acceptance criteria."
+ },
+ {
+  "trigger": false,
+  "query": "/smart-plan add CSV export to the report page"
+ },
+ {
+  "trigger": false,
+  "query": "Make an implementation plan for the invite flow."
+ },
+ {
+  "trigger": false,
+  "query": "Record the decision to use Postgres over MongoDB as an ADR."
+ },
+ {
+  "trigger": false,
+  "query": "/smart-implement .agents/plans/2026/11/25/plan.md"
+ },
+ {
+  "trigger": false,
+  "query": "Run QA on the plan we just built."
+ },
+ {
+  "trigger": false,
+  "query": "Fix the findings in the QA report."
+ },
+ {
+  "trigger": false,
+  "query": "Why is the report page slow? Write an analysis."
+ },
+ {
+  "trigger": false,
+  "query": "Rename the variable userId to accountId in the billing module."
+ }
+]

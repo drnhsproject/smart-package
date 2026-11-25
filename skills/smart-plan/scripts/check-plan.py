@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Mechanical self-check for a smart-plan plan file. Standard library only.
 
-  check-plan.py PLAN.md [--root DIR] [--plans-dir DIR]
+  check-plan.py PLAN.md [--root DIR] [--plans-dir DIR] [--spec SPEC.md]
 
 Checks what a script can prove, so the model does not have to claim it:
   - header: title, Status, Revision, Ticket; Part/Series come as a pair
@@ -12,6 +12,9 @@ Checks what a script can prove, so the model does not have to claim it:
   - every `file:line` citation: the file exists under --root and the line is in range
   - paths named under "Reused code" exist
   - the premortem line ("This plan fails if"), full plans only (a short plan has no Risks section)
+  - with --spec: every `AC-n` a task cites exists in the spec's "Acceptance criteria", every spec
+    `AC-n` is cited by a task of this plan or of the other parts of its Series, and a task that cites
+    none gets a NOTE (not a failure)
   - split plans: across all parts of the Series, ids are unique, parts are numbered 1..m
     without gaps, and BLOCKED_BY never points at a later part
 
@@ -239,11 +242,49 @@ def check_series(plan, h, tasks, plans_dir):
         fail("series", f"part {n} should name the previous part in `Follows:`")
 
 
+AC = re.compile(r"\bAC-\d+\b")
+
+
+def accept_text(rest):
+    m = re.search(r"Accept:\s*(.*?)(?=\s+·\s|$)", rest)
+    return m.group(1) if m else ""
+
+
+def check_spec(spec_path, tasks, plan, h, plans_dir):
+    try:
+        stext = spec_path.read_text(errors="ignore")
+    except OSError as e:
+        print(f"ERROR [check-plan.py]: cannot read the spec {spec_path}: {e}", file=sys.stderr)
+        sys.exit(2)
+    ac_lines = sections(stext).get("Acceptance criteria")
+    if ac_lines is None:
+        fail("spec", f"{spec_path.name} has no `## Acceptance criteria` section")
+        return
+    defined = set(AC.findall("\n".join(ac_lines)))
+    covered = set()
+    for t in tasks:
+        cited = set(AC.findall(accept_text(t["rest"])))
+        for c in sorted(cited - defined):
+            fail("spec", f"{t['id']}: cites {c}, which {spec_path.name} does not define")
+        if not cited:
+            print(f"NOTE: {t['id']} cites no AC-n from the spec")
+        covered |= cited
+    if "Series" in h:
+        for sib in siblings(plan, h["Series"], plans_dir):
+            if sib.resolve() == plan.resolve():
+                continue
+            covered |= set(AC.findall(" ".join(accept_text(t["rest"]) for t in parse_tasks(
+                sections(sib.read_text(errors="ignore")).get("Tasks", [])))))
+    for c in sorted(defined - covered, key=lambda x: int(x[3:])):
+        fail("spec", f"{c} in {spec_path.name} is cited by no task of this plan" + (" or its Series" if "Series" in h else ""))
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("plan")
     ap.add_argument("--root", default=".", help="project root that cited paths are relative to (default: .)")
     ap.add_argument("--plans-dir", help="folder to search for the other parts of a split plan")
+    ap.add_argument("--spec", help="the Spec this plan follows: trace its AC-n ids against the tasks")
     a = ap.parse_args()
     plan = Path(a.plan).resolve()
     if not plan.is_file() or plan.suffix.lower() != ".md":
@@ -256,7 +297,7 @@ def main():
     h = header(text)
     if not re.search(r"^# (Plan|Analysis):\s*\S", text, re.M):
         fail("header", "no `# Plan: <title>` line")
-    if "# Analysis:" in text:
+    if re.search(r"^# Analysis:\s*\S", text, re.M):
         print("NOTE: an analysis has no tasks; only citations are checked")
         check_citations(text, root)
     else:
@@ -276,6 +317,8 @@ def main():
         tasks = check_tasks(secs, h)
         check_citations(text, root)
         check_reused(secs, root)
+        if a.spec:
+            check_spec(Path(a.spec).resolve(), tasks, plan, h, a.plans_dir)
         if "Recommended approach" in secs and "This plan fails if" not in text:
             fail("risks", 'no premortem line ("This plan fails if ...")')
         if "Series" in h and tasks:

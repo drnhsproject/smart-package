@@ -1,0 +1,66 @@
+[
+ {
+  "trigger": true,
+  "query": "/smart-guide"
+ },
+ {
+  "trigger": true,
+  "query": "What should I do next on this project?"
+ },
+ {
+  "trigger": true,
+  "query": "Where was I? I cleared the chat and lost track."
+ },
+ {
+  "trigger": true,
+  "query": "Which skill should I use to record a hard decision?"
+ },
+ {
+  "trigger": true,
+  "query": "Lanjut apa sekarang?"
+ },
+ {
+  "trigger": true,
+  "query": "Skill mana yang cocok untuk menulis spesifikasi?"
+ },
+ {
+  "trigger": true,
+  "query": "I just finished implementing, what is the next step?"
+ },
+ {
+  "trigger": true,
+  "query": "/smart-guide I want to check an idea before planning"
+ },
+ {
+  "trigger": false,
+  "query": "Make a plan for adding dark mode."
+ },
+ {
+  "trigger": false,
+  "query": "Write a spec for the invite flow."
+ },
+ {
+  "trigger": false,
+  "query": "Fix the QA findings."
+ },
+ {
+  "trigger": false,
+  "query": "Run QA on this plan."
+ },
+ {
+  "trigger": false,
+  "query": "Explain what the retry helper does."
+ },
+ {
+  "trigger": false,
+  "query": "Research which library parses PDFs best."
+ },
+ {
+  "trigger": false,
+  "query": "Commit my changes."
+ },
+ {
+  "trigger": false,
+  "query": "Buat fungsi untuk menghitung diskon."
+ }
+]

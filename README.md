@@ -33,11 +33,18 @@ an existing `docs/plans/` or `plans/` folder is used instead if the project has 
 ```
 .agents/plans/YYYY/MM/DD/YYYY-MM-DD-<TICKET>-<name>.md     the plan (DRAFT → DONE)
 .agents/analysis/YYYY/MM/DD/YYYY-MM-DD-<name>.md            an analysis (FINAL, never rewritten)
+.agents/specs/YYYY/MM/DD/YYYY-MM-DD-<TICKET>-<name>-spec.md  a Spec (DRAFT → APPROVED → DONE)
+.agents/adr/YYYY/MM/DD/YYYY-MM-DD-<TICKET>-<name>-adr.md    an ADR (PROPOSED → ACCEPTED → SUPERSEDED)
 ```
 
-Every plan carries its ticket (`Ticket: ABC-123`, taken from `--ticket=`, your message, or
-the git branch name; asked once if none is found) and its tasks are numbered with it
-(`ABC-123-T1`, `ABC-123-T2`, ...). `/smart-implement ABC-123` finds the plan by ticket.
+Every plan carries its ticket (`Ticket: ABC-123`, taken from `--ticket=`, your message, the Spec the plan
+follows, or the git branch name) and its tasks are numbered with it (`ABC-123-T1`, `ABC-123-T2`, ...).
+`/smart-implement ABC-123` finds the plan by ticket. When no ticket is found, `smart-plan` suggests one
+shaped `<APP>-<TYPE>-<NNN>` (for example `SMARTPLAN-FEAT-003`; TYPE is `FEAT`, `FIX`, `REFACTOR`,
+`CHORE`, `DOCS`, `PERF`, `TEST` or `ADR`) and asks once; the script `ticket-tools.py suggest` computes the
+app name from your manifest and the next number from the tickets already on disk, and nothing is applied
+without your yes. When a plan follows a Spec, `check-plan.py --spec` proves that every task cites an
+`AC-n` the Spec defines and that every `AC-n` is covered by a task.
 
 The plan file is the only work file: its `## Tasks` checklist is what gets executed,
 and its `## Execution log` is where `smart-implement` records what happened. Commit
@@ -81,6 +88,94 @@ Flow: Clarify → Explore → Rules → Grill → Design → Self-check → Outp
   recommends the next part when one is finished.
 - **Your language.** Questions, options, summaries and every "Next step" menu follow the language you write
   in; the plan file itself stays in English.
+
+## smart-spec
+
+```
+/smart-spec add CSV export to the report page     write the Spec and save it
+/smart-spec <topic> --ticket=ABC-123              ticket to put on the Spec
+/smart-spec <topic> --scope=src/billing           restrict the code lookup to a path
+/smart-spec <topic> --no-save                     chat only, writes nothing
+```
+
+One job: write a Spec that says what the work must do, in your words, with numbered acceptance criteria
+(`AC-1`, `AC-2`, ...) and a test approach. It gathers from the conversation and a read-only look at the code,
+asks only about real gaps, and never cites a file or a line: where and how belong to the plan. The script
+`check-spec.py` proves the headings, the status, the ticket, unique `AC-n` ids and the absence of `file:line`
+citations. `smart-plan` then follows the Spec (`Follows: <spec path>`), takes its ticket, and cites the
+`AC-n` it satisfies. Statuses move `DRAFT → APPROVED → DONE` through `ticket-tools.py set-status`, never by
+hand. Optional: install it with `--skill smart-spec`.
+
+## smart-adr
+
+```
+/smart-adr use Postgres instead of MongoDB for orders   gate the decision, write the ADR, save it
+/smart-adr <decision> --ticket=APP-ADR-007               ticket to put on the ADR
+/smart-adr <decision> --supersedes=<path>                the older ADR this one replaces
+/smart-adr <decision> --no-save                          chat only, writes nothing
+```
+
+One job: record one architectural decision, and only when it deserves a record. The decision must pass
+three tests, each backed by one line of evidence: costly to undo, not obvious from the code, and a genuine
+trade-off. If a test fails the skill says which one and writes nothing; you may override once, and the
+override is written in the file. An ADR gets its own id, a suggested `<APP>-ADR-<NNN>` (`Related:` holds the
+feature ticket when there is one). `check-adr.py` proves the headings, the status, the ticket, the three
+reasons and that every `Supersedes:` path exists. Statuses move `PROPOSED → ACCEPTED → SUPERSEDED`
+through `ticket-tools.py set-status`, never by hand, and an accepted ADR is never rewritten: a change of
+mind is a new ADR that supersedes it. Optional: install it with `--skill smart-adr`.
+
+## smart-retro
+
+```
+/smart-retro payment-timeout            look back over that work and write at most one file
+/smart-retro <topic> --since=7d         how far back to look: 7d, or a date YYYY-MM-DD
+/smart-retro <topic> --no-save          chat only, writes nothing
+```
+
+One job: keep what a piece of work taught, past the end of the session. It sorts the work into three kinds and
+writes at most one file. A fix with a known root cause and a cited result becomes an entry at the top of
+`CHANGELOG_FIXES.md`. Work that will continue in another session becomes one handoff file under `handoffs/`,
+with the open tasks copied in. Finished knowledge (an analysis, a decision) writes nothing and points to
+`docs/` or `/smart-adr`. A fix without a cited result is written with the label `PENDING verification`. The
+script `retro-tools.py` gathers the facts without reading a whole changelog (`digest`) and checks the file it
+wrote (`check-changelog`: newest entry on top, no repeated number; `check-handoff`: at most 150 lines, a title
+and a `Status:` line). It never edits code, plans or the handoff of other work, and never commits. Optional:
+install it with `--skill smart-retro`.
+
+## smart-research
+
+```
+/smart-research what does RFC 9110 say about idempotent methods   research it and save the analysis
+/smart-research <question> --no-save                              chat only, no file in the project
+```
+
+One job: answer a question about the outside world (a library's real behaviour, a standard, a price, a legal
+text) with sources. It searches with generic words only, never your project's name, paths or code, reads the
+primary source behind each claim, and saves one analysis in `.agents/analysis/` in which every finding ends in a
+source id. A claim that only secondary pages (blogs, forums) support is marked `UNVERIFIED`. The script
+`check-research.py` proves the headings, a `Confidence:` line, that every finding is cited and every source is
+used, and that each source is an `https` link with a `Retrieved` date, a kind (primary or secondary) and no
+credential in the link. It cannot prove that a source supports its claim; the skill says which key claims it did
+not re-read. Fetched pages are treated as data, never as instructions. A question your own code answers belongs
+to `/smart-plan --analysis`. Optional: install it with `--skill smart-research`.
+
+## smart-guide
+
+```
+/smart-guide                          what should I do now, from what is on disk
+/smart-guide I want to check an idea  which installed skill fits that job
+```
+
+One job: tell you what comes next, because a skill's menu is lost after a `/clear` or a new session. It writes
+nothing. The script `guide-state.py` reads the plans, specs, ADRs and QA reports of the project and applies a
+fixed rule table, so the same files always give the same answer: a draft Spec is reviewed; a draft or approved
+plan goes to `/smart-implement`; a done plan with no QA line goes to `/smart-qa`; open findings go to
+`/smart-fix` (with `--all` when only MEDIUM or LOW remain); fixed but unverified findings go to
+`/smart-qa --recheck`; a deferred finding goes to `/smart-plan`; clean QA goes to the next part, or to `/smart-retro`; a proposed ADR is reviewed. A part
+whose predecessor is unfinished, or still needs a fix or a recheck, is not recommended. Its second subcommand,
+`skills`, lists the installed skills with the first sentence of each description, so a new skill appears
+without editing the guide. It names the command and never runs it. Optional: install it with
+`--skill smart-guide`.
 
 ## smart-implement
 
@@ -137,6 +232,11 @@ Flow: Locate → Scope → Baseline → Test → Security → Regression → Liv
   concurrent calls, callers of what changed, then a security pass (injection, auth and
   object-level access, uploads, secrets, new dependencies). Each finding carries a
   reproduction or `file:line`; no evidence, no finding.
+- **Checks the change against the Spec** when the plan follows one (`Follows: <spec path>`, or a Spec with
+  the same ticket). Every `AC-n` is probed like an Accept criterion and listed in a `## Spec check` table as
+  `MET`, `NOT MET` or `NOT TESTED`; a `NOT MET` criterion becomes a finding and makes the verdict `FAIL`. A
+  plan without a Spec is tested exactly as before. `smart-qa` carries its own copy of `ticket-tools.py`
+  (identical to the one in `smart-plan`) to find the Spec.
 - **Never edits product code.** Fixes go back through `smart-plan` → `smart-implement`.
 - **Logins are not skipped silently.** It uses a local test setup, or a session you pass in the
   `QA_SESSION_COOKIE` environment variable (never pasted in chat). Without either, those checks
@@ -219,6 +319,21 @@ the menu. A skill never starts the next one on its own, so you read each result 
                        design changes ──→ /smart-plan → /smart-implement → /smart-qa
 ```
 
+Two optional skills sit in front of this chain. `smart-spec` writes what the work must do, with numbered
+`AC-n` criteria; `smart-plan` then follows it (`Follows: <spec path>`) and cites those ids in every task's
+`Accept:`. `smart-adr` records a hard-to-reverse decision; `smart-plan` hints at both in its menu when they
+apply but never writes their files.
+
+```
+/smart-spec → (you approve) → /smart-plan → /smart-implement → /smart-qa
+/smart-adr  (any time, for a decision that earns a record)
+```
+
+Three more optional skills sit beside the chain, none of them a step in it. `smart-retro` runs after a piece of
+work and keeps what it taught in one file (a changelog entry or a handoff). `smart-research` answers a question
+about the outside world with dated, numbered sources, and a plan may follow its analysis. `smart-guide` reads
+what is on disk and names the next command, at any point.
+
 ## Which model for which step
 
 A suggestion, not a requirement, and not measured: it is the author's reasoning about where
@@ -272,7 +387,7 @@ npx skills add drnhsproject/smart-package --skill smart-plan --skill smart-imple
 npx skills add drnhsproject/smart-package --skill smart-plan --skill smart-implement --skill smart-qa --skill smart-fix -g
 ```
 
-`smart-interview` is optional: add `--skill smart-interview` to the command, or copy `skills/smart-interview` the same way.
+`smart-interview`, `smart-spec`, `smart-adr`, `smart-retro`, `smart-research` and `smart-guide` are optional: add `--skill smart-interview`, `--skill smart-spec`, `--skill smart-adr`, `--skill smart-retro`, `--skill smart-research` or `--skill smart-guide` to the command, or copy the folder the same way. `smart-spec` and `smart-adr` each carry their own copy of `ticket-tools.py`, identical to the one in `smart-plan`.
 Four skills carry a helper script (`smart-plan/scripts/check-plan.py`, `smart-implement/scripts/scope-trace.py`, `smart-fix/scripts/scope-trace.py` (an identical copy, so `smart-fix` works installed alone), `smart-interview/scripts/interview.py`); they need Python 3 (and `git` for the scope trace), and each skill falls back to doing the same by hand without it. When copying by hand, copy the whole folder, not only `SKILL.md`.
 
 Checked on 2026-11-16, with all four skills in the repository: `--list` found `smart-plan`,
@@ -306,6 +421,13 @@ Updates are manual; installed copies do not change on their own:
 None required. If the project has `graphify-out/graph.json`, the skill uses it.
 If the project has a rule index (`AGENTS.md`, `.agents/rules/`), it reads only the
 rules the plan depends on.
+
+## Credits
+
+Some ideas here (one job per skill, a spec that never cites files, a decision record written only when it
+earns its place, thin vertical slices, notes of rejected ideas) were studied in
+[mattpocock/skills](https://github.com/mattpocock/skills) (MIT). All wording, headings and code in this
+repository are our own.
 
 ## License
 

@@ -1,0 +1,66 @@
+[
+ {
+  "trigger": true,
+  "query": "/smart-research"
+ },
+ {
+  "trigger": true,
+  "query": "Research what the official docs say about rate limits in the GitHub REST API and cite the sources."
+ },
+ {
+  "trigger": true,
+  "query": "Find the official documentation that explains how Postgres handles serializable isolation."
+ },
+ {
+  "trigger": true,
+  "query": "What does the RFC say about the maximum length of a URL? Give me the source."
+ },
+ {
+  "trigger": true,
+  "query": "Riset sumber resmi tentang aturan retensi data di GDPR."
+ },
+ {
+  "trigger": true,
+  "query": "Check the source: is it true that Stripe retries failed webhooks for three days?"
+ },
+ {
+  "trigger": true,
+  "query": "/smart-research which license does the sharp library use"
+ },
+ {
+  "trigger": true,
+  "query": "Cari sumber primer tentang batas ukuran payload di AWS Lambda."
+ },
+ {
+  "trigger": false,
+  "query": "Explain what the retry helper in this repo does."
+ },
+ {
+  "trigger": false,
+  "query": "Make a plan for adding rate limiting to our API."
+ },
+ {
+  "trigger": false,
+  "query": "Write a spec for the export feature."
+ },
+ {
+  "trigger": false,
+  "query": "Fix the failing test in billing."
+ },
+ {
+  "trigger": false,
+  "query": "Run QA on the plan we implemented."
+ },
+ {
+  "trigger": false,
+  "query": "Where in our code do we parse webhooks?"
+ },
+ {
+  "trigger": false,
+  "query": "Record the root cause of the bug we fixed today."
+ },
+ {
+  "trigger": false,
+  "query": "Buatkan fungsi untuk memformat tanggal."
+ }
+]

@@ -88,6 +88,8 @@ Look for these, in order, and remember what exists. Everything later is conditio
 | Change history (`CHANGELOG_FIXES.md`, `CHANGELOG.md`) | grep only, never read whole | `git log` |
 | Plans folder (`.agents/plans/`, else an existing `docs/plans/` or `plans/`) | save here, in dated folders | create `.agents/plans/` |
 | Analysis folder (`.agents/analysis/`, else an existing `docs/analysis/`) | save analyses here | create `.agents/analysis/` |
+| Glossary (`GLOSSARY.md`, `docs/glossary*`, `.agents/rules/*glossary*`) | read only the terms the plan uses, and word task criteria with them | skip |
+| Rejected ideas (`.agents/out-of-scope/`, one note per idea; first line `# Not doing: <idea>`) | grep it in Step 2 before planning | skip |
 | Package manifest (`package.json`, `pyproject.toml`, `go.mod`, `composer.json`, …) | find the real lint / typecheck / test commands | ask or label `UNVERIFIED` |
 
 Never invent a path or command that Step 0 did not find. Write the project's real
@@ -110,11 +112,19 @@ when the code is known and the questions can be sharp.
 ### Ticket number
 
 Every plan carries the ticket it belongs to, in the header and in every task id. Take it,
-in this order, from: `--ticket=`, the user's message, the current git branch name
-(`git branch --show-current`, first match of `[A-Za-z][A-Za-z0-9]*-[0-9]+(-[A-Za-z]?[0-9]+)*`, uppercased, so a ticket such as `PRTFL-191126-T0856` is kept whole), the
-newest open plan's `Ticket:`. If none is found, ask once ("Which ticket is this for? Reply
-`none` if there is no ticket"). With no ticket, the header says `Ticket: none` and task ids
-are plain `T<n>`. Never invent a ticket number.
+in this order, from: `--ticket=`, the user's message, the `Ticket:` of the Spec the plan follows (see "Following a Spec" in Step 4), the current git branch name
+(`git branch --show-current`, first match of `[A-Za-z][A-Za-z0-9]*(?:-(?:FEAT|FIX|REFACTOR|CHORE|DOCS|PERF|TEST|ADR))?-[0-9]+(?:-[A-Za-z]?[0-9]+)*`, case-insensitive, uppercased, so `feature/smartplan-feat-003-x` gives `SMARTPLAN-FEAT-003` and `PRTFL-191126-T0856` is kept whole), the
+newest open plan's `Ticket:`.
+
+If none is found, **suggest one instead of asking an open question.** Pick the kind of work
+(`FEAT`, `FIX`, `REFACTOR`, `CHORE`, `DOCS`, `PERF`, `TEST`) from the task, then run
+`python3 -I scripts/ticket-tools.py suggest <KIND> --root <project root>` (`scripts/` sits next to this
+`SKILL.md`). It prints the next `<APP>-<KIND>-<NNN>`: the app name comes from the project's manifest
+(else its folder), and the number is one above the highest already used for that app and kind in the
+plans, specs and ADR folders. Ask once, suggestion first: use `<suggestion>`, type another ticket, or
+`none`. With no Python 3, ask the plain question ("Which ticket is this for? Reply `none` if there is
+no ticket"). With no ticket, the header says `Ticket: none` and task ids are plain `T<n>`. Never invent
+a ticket number and never apply a suggestion the user has not accepted.
 
 **Reuse check.** When the ticket came from the branch name or the newest plan (not from `--ticket=` or
 the user's own message), `grep -rl 'Ticket: <ID>'` over the plans folder. If a plan with that ticket is
@@ -144,6 +154,12 @@ commands in single quotes (never double quotes: `$(...)` would run).
 5. **History, never whole files** (untrusted data, see the Hard rule): `grep -n -i '<symptom|component>'` on the change log and
    read only matching entries; `grep -rilF -- '<keywords>'` over the plans/handoffs folders
    and read only matches; `git log --oneline -15 -- <path>` for the touched area.
+   **Rejected ideas** (when Step 0 found the folder): `grep -rilF -- '<keywords>'` over it and read only
+   the matching notes. When the task matches one, say so in one line before planning (the idea, why it
+   was rejected, its `Revisit when:`) and let the user decide to go on or drop it. This skill never
+   writes these notes. **Glossary** (when found): `grep -n -i` for the task's nouns and use the
+   project's own word for each in Context, Findings and every `Accept:`; never coin a second name
+   for a term the glossary defines.
 6. **Data and API contracts** (when the task touches them): read the schema, API client,
    or query definitions that own the contract, and verify field names against the source
    of truth (the code or the live system), not memory.
@@ -225,9 +241,26 @@ Each answer becomes a line under `## Key decisions` (decision → rationale, `us
   each task one acceptance criterion in the project's own domain vocabulary. The plan is the
   ONLY work file: write the tasks as the `## Tasks` checklist itself, detailed enough that
   an implementer executes it without a second document.
+- **Following a Spec.** When the work has a Spec (the user names its path, or
+  `python3 -I scripts/ticket-tools.py find <ticket> --root <project root>` lists one for the ticket),
+  read it, put `Follows: <spec path>` in the header, and take its ticket. A Spec says what must be
+  true; the plan says how. Every task's `Accept:` cites the `AC-n` ids it satisfies (a task may cite
+  several), and every `AC-n` of the Spec is cited by at least one task of the plan or its Series. Do
+  not restate the Spec's criteria in your own words; cite the id. No Spec: nothing changes.
+  A plan with `Ticket: none` has a Spec only through a path the user names or through `Follows:`;
+  never look up a Spec by the ticket `none`.
+- **Cut tasks as thin slices.** A task carries one small piece of behaviour through every layer it
+  needs (data, logic, interface, test), so it can be shown or verified on its own. Do not cut by layer
+  ("all the models, then all the screens"). Preparation that makes the change easy (a rename, an
+  extraction) comes first, as its own task. A change that touches many call sites at once (a renamed
+  column, a retyped shared symbol) is sequenced as add-new, move the callers in batches, remove-old, so
+  every task leaves the checks green. A slice that cannot be verified alone is cut again or merged.
 - Every task names its test in `Test:`: the test that fails on the old code and passes on the new
-  (file or name, plus what it proves). A task that changes logic gets a real test; a task that changes
-  only docs, config, or copy writes `Test: none — <reason>`. The implementer writes the test first.
+  (file or name, plus what it proves) and the seam it exercises. Prefer the highest practical seam
+  (the public function, route, or screen a user or caller touches), and one seam per behaviour when
+  possible, over many small tests of internals. A task that changes logic gets a real test; a task
+  that changes only docs, config, or copy writes `Test: none — <reason>`. The implementer writes the
+  test first.
 - Every task must change something. Behaviour that already exists and stays as it is
   belongs in Findings, never in Tasks.
 - Name the concrete files to touch. For a pattern repeated across many files, describe it
@@ -241,7 +274,7 @@ Each answer becomes a line under `## Key decisions` (decision → rationale, `us
 never inside the project), then run:
 
 ```
-python3 -I scripts/check-plan.py "${TMPDIR:-/tmp}/smart-plan-draft.md" --root <project root> [--plans-dir <plans folder>]
+python3 -I scripts/check-plan.py "${TMPDIR:-/tmp}/smart-plan-draft.md" --root <project root> [--plans-dir <plans folder>] [--spec <spec path>]
 ```
 
 `scripts/check-plan.py` sits next to this `SKILL.md` (locate it once with `find` if needed; Python 3,
@@ -249,6 +282,8 @@ standard library only). It proves the mechanical part: header fields, required s
 (unique, with the header ticket, never pre-checked), `Accept` and `Verify` on every task,
 `BLOCKED_BY` that exists and points backwards, every `file:line` and Reused-code path, the premortem
 line of a full plan, and the cross-part rules of a split (`--plans-dir` finds the sibling parts).
+With `--spec`, it also proves that every `AC-n` a task cites exists in the Spec and that every `AC-n`
+of the Spec is cited by a task of the plan or its Series.
 Fix every `FAIL` line, or label the item `UNVERIFIED`, and run it again until it prints `OK`. Never
 say a check passed that the script did not print. If Python 3 is missing, do the checks below by
 hand and say so in one line. The script does not judge the plan: the remaining checks are yours.
@@ -304,6 +339,7 @@ Follows: <optional prior plan> · Sibling: <optional parallel plan> · Part: <n 
 ```
 
 **Analysis mode (`--analysis`, or when the user asks "why/how/what" rather than for a change):**
+A question that outside sources answer (a library's documented behaviour, a standard, a price) is for `/smart-research`, which cites a dated source for every finding; a question about this codebase stays here.
 
 ```markdown
 # Analysis: <question>
@@ -371,6 +407,12 @@ Next step:
 1. Execute — reply "go" or "1", or run `/smart-implement <plan name or path>`
 2. Revise the plan — reply "2" and say what to change
 ```
+
+Add one extra menu line only when it applies, and say it writes nothing here:
+`3. Spec first: /smart-spec <topic>` when the plan changes behaviour a user will see and no Spec was
+followed; `3. Record a decision: /smart-adr <decision>` when a Key decision is costly to undo, not
+obvious from the code, and a real trade-off. Both are optional hand-offs to other skills; this skill
+never runs them and never writes their files.
 
 For a split plan, list every part in one line each (number, outcome, task count), say that
 parts run in order and that `smart-implement` will recommend the next part when one is done, and
